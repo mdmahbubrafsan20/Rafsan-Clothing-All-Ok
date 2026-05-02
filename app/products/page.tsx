@@ -36,7 +36,9 @@ function ProductsContent() {
     async function loadCategories() {
       try {
         const data = await getAllCategories();
-        setCategories(["all", ...data]);
+        // Extract category names for the filter buttons
+        const categoryNames = data.map(category => category.name);
+        setCategories(["all", ...categoryNames]);
       } catch (error) {
         console.error("Failed to load categories:", error);
       }

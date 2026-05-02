@@ -2,18 +2,22 @@
 
 import AdminDashboardLayout from "@/components/AdminDashboardLayout";
 import { ShoppingBag, Search, Filter, Eye, Truck, CheckCircle, XCircle, Clock, DollarSign, ChevronLeft, ChevronRight, Loader2, Package, User, Calendar } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Order, OrderStatus, getAllOrders, updateOrderStatus, updateOrderTracking, getOrderStats } from "@/lib/orders";
+
+const statusOptions: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
+    confirmed: 0,
     processing: 0,
     shipped: 0,
     delivered: 0,
@@ -30,12 +34,9 @@ export default function AdminOrdersPage() {
 
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
+    setErrorMessage("");
     try {
       const [ordersData, statsData] = await Promise.all([
         getAllOrders(),
@@ -43,21 +44,33 @@ export default function AdminOrdersPage() {
       ]);
       setOrders(ordersData);
       setStats(statsData);
-    } catch (error) {
-      console.error("Failed to load data:", error);
+    } catch {
+      setErrorMessage("Orders could not be loaded. Please make sure you are signed in and have permission to view orders.");
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loadData]);
 
   const filteredOrders = orders.filter(order => {
+    const searchValue = searchTerm.toLowerCase();
     const matchesSearch = 
-      order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchTerm.toLowerCase());
+      (order.order_number || "").toLowerCase().includes(searchValue) ||
+      (order.user?.email || "").toLowerCase().includes(searchValue) ||
+      (order.user?.full_name || order.customer_name || "").toLowerCase().includes(searchValue) ||
+      (order.id || "").toLowerCase().includes(searchValue);
     
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" ||
+      order.status === statusFilter ||
+      (statusFilter === "confirmed" && order.status === "processing");
     
     return matchesSearch && matchesStatus;
   });
@@ -67,13 +80,26 @@ export default function AdminOrdersPage() {
   const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
 
   const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
+    const previousOrders = orders;
+    const nextOrders = orders.map(order => order.id === orderId ? { ...order, status: newStatus } : order);
+
+    setOrders(nextOrders);
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, status: newStatus });
+    }
+    setStats(calculateStats(nextOrders));
+
     const updatedOrder = await updateOrderStatus(orderId, newStatus);
     if (updatedOrder) {
       setOrders(orders.map(order => order.id === orderId ? updatedOrder : order));
-      // Refresh stats
       const newStats = await getOrderStats();
       setStats(newStats);
+      return;
     }
+
+    setOrders(previousOrders);
+    setStats(calculateStats(previousOrders));
+    setErrorMessage("Status could not be updated. Please check your order update permission.");
   };
 
   const handleTrackingUpdate = async (orderId: string) => {
@@ -94,6 +120,8 @@ export default function AdminOrdersPage() {
       setShowOrderModal(false);
       setSelectedOrder(null);
       setTrackingForm({ trackingNumber: "", carrier: "", estimatedDelivery: "" });
+    } else {
+      setErrorMessage("Tracking could not be updated. Please check your order update permission.");
     }
   };
 
@@ -110,6 +138,7 @@ export default function AdminOrdersPage() {
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
       case 'processing': return 'bg-blue-100 text-blue-800';
       case 'shipped': return 'bg-purple-100 text-purple-800';
       case 'delivered': return 'bg-green-100 text-green-800';
@@ -121,6 +150,7 @@ export default function AdminOrdersPage() {
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
       case 'pending': return <Clock className="h-4 w-4" />;
+      case 'confirmed': return <Package className="h-4 w-4" />;
       case 'processing': return <Package className="h-4 w-4" />;
       case 'shipped': return <Truck className="h-4 w-4" />;
       case 'delivered': return <CheckCircle className="h-4 w-4" />;
@@ -136,6 +166,43 @@ export default function AdminOrdersPage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  const getStatusLabel = (status: OrderStatus) => {
+    if (status === "processing") return "Confirmed";
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  const getItemPrice = (item: NonNullable<Order["items"]>[number]) => {
+    return item.price_at_time ?? item.price ?? 0;
+  };
+
+  function calculateStats(nextOrders: Order[]) {
+    return nextOrders.reduce(
+      (result, order) => {
+        result.total += 1;
+        result.totalRevenue += Number(order.total_amount) || 0;
+
+        if (order.status === "pending") result.pending += 1;
+        if (order.status === "confirmed") result.confirmed += 1;
+        if (order.status === "processing") result.processing += 1;
+        if (order.status === "shipped") result.shipped += 1;
+        if (order.status === "delivered") result.delivered += 1;
+        if (order.status === "cancelled") result.cancelled += 1;
+
+        return result;
+      },
+      {
+        total: 0,
+        pending: 0,
+        confirmed: 0,
+        processing: 0,
+        shipped: 0,
+        delivered: 0,
+        cancelled: 0,
+        totalRevenue: 0,
+      }
+    );
+  }
 
   if (loading) {
     return (
@@ -236,7 +303,7 @@ export default function AdminOrdersPage() {
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
+                  <option value="confirmed">Confirmed</option>
                   <option value="shipped">Shipped</option>
                   <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>
@@ -248,6 +315,11 @@ export default function AdminOrdersPage() {
 
         {/* Orders Table */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          {errorMessage && (
+            <div className="border-b border-yellow-200 bg-yellow-50 px-6 py-3 text-sm text-yellow-800">
+              {errorMessage}
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -265,7 +337,7 @@ export default function AdminOrdersPage() {
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="py-4 px-6">
                       <div>
-                        <p className="font-medium text-gray-900">{order.order_number}</p>
+                        <p className="font-medium text-gray-900">{order.order_number || `ORD-${order.id.substring(0, 8).toUpperCase()}`}</p>
                         <p className="text-sm text-gray-500">ID: {order.id.substring(0, 8)}...</p>
                       </div>
                     </td>
@@ -275,8 +347,8 @@ export default function AdminOrdersPage() {
                           <User className="h-4 w-4 text-gray-600" />
                         </div>
                         <div className="ml-3">
-                          <p className="font-medium text-gray-900">{order.user?.full_name || "N/A"}</p>
-                          <p className="text-sm text-gray-500">{order.user?.email}</p>
+                          <p className="font-medium text-gray-900">{order.user?.full_name || order.customer_name || "N/A"}</p>
+                          <p className="text-sm text-gray-500">{order.user?.email || order.phone || "N/A"}</p>
                         </div>
                       </div>
                     </td>
@@ -285,11 +357,22 @@ export default function AdminOrdersPage() {
                       <p className="text-sm text-gray-500">{order.payment_method}</p>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex items-center">
+                      <div className="flex items-center space-x-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${getStatusColor(order.status)}`}>
                           {getStatusIcon(order.status)}
-                          <span className="ml-1">{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+                          <span className="ml-1">{getStatusLabel(order.status)}</span>
                         </span>
+                        <select
+                          className="bg-gray-100 rounded-lg px-3 py-1 text-xs border-none outline-none"
+                          value={order.status === "processing" ? "confirmed" : order.status}
+                          onChange={(e) => handleStatusUpdate(order.id, e.target.value as OrderStatus)}
+                        >
+                          {statusOptions.map(status => (
+                            <option key={status} value={status}>
+                              {getStatusLabel(status)}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -309,46 +392,22 @@ export default function AdminOrdersPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        {order.status === 'pending' && (
-                          <button
-                            onClick={() => handleStatusUpdate(order.id, 'processing')}
-                            className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Mark as Processing"
-                          >
-                            <Package className="h-4 w-4" />
-                          </button>
-                        )}
-                        {order.status === 'processing' && (
-                          <button
-                            onClick={() => handleStatusUpdate(order.id, 'shipped')}
-                            className="p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-colors"
-                            title="Mark as Shipped"
-                          >
-                            <Truck className="h-4 w-4" />
-                          </button>
-                        )}
-                        {order.status === 'shipped' && (
-                          <button
-                            onClick={() => handleStatusUpdate(order.id, 'delivered')}
-                            className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Mark as Delivered"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </button>
-                        )}
-                        {(order.status === 'pending' || order.status === 'processing') && (
-                          <button
-                            onClick={() => handleStatusUpdate(order.id, 'cancelled')}
-                            className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Cancel Order"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </button>
-                        )}
                       </div>
                     </td>
                   </tr>
                 ))}
+                {paginatedOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-12 px-6 text-center">
+                      <p className="font-medium text-gray-900">No orders found</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {searchTerm || statusFilter !== "all"
+                          ? "Try changing the search or status filter."
+                          : "Orders will appear here once customers place them."}
+                      </p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -420,7 +479,7 @@ export default function AdminOrdersPage() {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Status:</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
-                        {selectedOrder.status}
+                        {getStatusLabel(selectedOrder.status)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -440,11 +499,11 @@ export default function AdminOrdersPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Name:</span>
-                      <span className="font-medium">{selectedOrder.user?.full_name || "N/A"}</span>
+                      <span className="font-medium">{selectedOrder.user?.full_name || selectedOrder.customer_name || "N/A"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Email:</span>
-                      <span className="font-medium">{selectedOrder.user?.email}</span>
+                      <span className="font-medium">{selectedOrder.user?.email || selectedOrder.phone || "N/A"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Shipping Address:</span>
@@ -543,13 +602,20 @@ export default function AdminOrdersPage() {
                             <p className="text-gray-900">{item.quantity}</p>
                           </td>
                           <td className="py-3 px-4">
-                            <p className="text-gray-900">{formatCurrency(item.price)}</p>
+                            <p className="text-gray-900">{formatCurrency(getItemPrice(item))}</p>
                           </td>
                           <td className="py-3 px-4">
-                            <p className="font-bold text-gray-900">{formatCurrency(item.price * item.quantity)}</p>
+                            <p className="font-bold text-gray-900">{formatCurrency(getItemPrice(item) * item.quantity)}</p>
                           </td>
                         </tr>
                       ))}
+                      {(!selectedOrder.items || selectedOrder.items.length === 0) && (
+                        <tr>
+                          <td colSpan={4} className="py-6 px-4 text-center text-sm text-gray-500">
+                            No order items found for this order.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

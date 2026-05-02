@@ -111,35 +111,73 @@ export default function AdminDashboardPage() {
       try {
         setLoading(true);
         
-        // Fetch total sales
-        const { data: salesData, error: salesError } = await supabase
-          .from("orders")
-          .select("total_amount");
-        
-        const totalSales = salesData?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+        // Fetch total sales with error handling
+        let totalSales = 0;
+        try {
+          const { data: salesData, error: salesError } = await supabase
+            .from("orders")
+            .select("total_amount");
+          
+          if (salesError) {
+            console.error("Error fetching sales data:", salesError);
+          } else {
+            totalSales = salesData?.reduce((sum, order) => sum + (order?.total_amount || 0), 0) || 0;
+          }
+        } catch (error) {
+          console.error("Unexpected error fetching sales:", error);
+        }
 
-        // Fetch total orders
-        const { data: ordersData } = await supabase
-          .from("orders")
-          .select("id, status");
-        
-        const totalOrders = ordersData?.length || 0;
-        const pendingOrders = ordersData?.filter(order => order.status === "pending").length || 0;
+        // Fetch total orders with error handling
+        let totalOrders = 0;
+        let pendingOrders = 0;
+        try {
+          const { data: ordersData, error: ordersError } = await supabase
+            .from("orders")
+            .select("id, status");
+          
+          if (ordersError) {
+            console.error("Error fetching orders data:", ordersError);
+          } else {
+            totalOrders = ordersData?.length || 0;
+            pendingOrders = ordersData?.filter(order => order?.status === "pending").length || 0;
+          }
+        } catch (error) {
+          console.error("Unexpected error fetching orders:", error);
+        }
 
-        // Fetch total products
-        const { data: productsData } = await supabase
-          .from("products")
-          .select("id, stock");
-        
-        const totalProducts = productsData?.length || 0;
-        const lowStockProducts = productsData?.filter(product => product.stock < 5).length || 0;
+        // Fetch total products with error handling
+        let totalProducts = 0;
+        let lowStockProducts = 0;
+        try {
+          const { data: productsData, error: productsError } = await supabase
+            .from("products")
+            .select("id, stock");
+          
+          if (productsError) {
+            console.error("Error fetching products data:", productsError);
+          } else {
+            totalProducts = productsData?.length || 0;
+            lowStockProducts = productsData?.filter(product => (product?.stock || 0) < 5).length || 0;
+          }
+        } catch (error) {
+          console.error("Unexpected error fetching products:", error);
+        }
 
-        // Fetch total customers
-        const { data: usersData } = await supabase
-          .from("users")
-          .select("id");
-        
-        const totalCustomers = usersData?.length || 0;
+        // Fetch total customers with error handling
+        let totalCustomers = 0;
+        try {
+          const { data: usersData, error: usersError } = await supabase
+            .from("users")
+            .select("id");
+          
+          if (usersError) {
+            console.error("Error fetching users data:", usersError);
+          } else {
+            totalCustomers = usersData?.length || 0;
+          }
+        } catch (error) {
+          console.error("Unexpected error fetching users:", error);
+        }
 
         // Fetch recent orders with user info
         const { data: recentOrdersData } = await supabase

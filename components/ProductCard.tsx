@@ -11,9 +11,9 @@ export default function ProductCard({ product }: { product: Product }) {
   const [imageError, setImageError] = useState(false);
   const { addToCart } = useCart();
   
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercent = hasDiscount && product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const hasDiscount = product.original_price && product.original_price > product.price;
+  const discountPercent = hasDiscount && product.original_price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
   // Premium fashion placeholder images from Unsplash
@@ -96,15 +96,15 @@ export default function ProductCard({ product }: { product: Product }) {
               ৳{product.price.toFixed(2)}
             </span>
 
-            {hasDiscount && product.originalPrice && (
+            {hasDiscount && product.original_price && (
               <span className="text-sm text-gray-500 dark:text-zinc-500 line-through">
-                ৳{product.originalPrice.toFixed(2)}
+                ৳{product.original_price.toFixed(2)}
               </span>
             )}
             
-            {hasDiscount && product.originalPrice && (
+            {hasDiscount && product.original_price && (
               <span className="ml-auto text-xs font-medium text-red-600 dark:text-red-400">
-                Save ৳{(product.originalPrice - product.price).toFixed(2)}
+                Save ৳{(product.original_price - product.price).toFixed(2)}
               </span>
             )}
           </div>

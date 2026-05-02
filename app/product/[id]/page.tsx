@@ -72,7 +72,7 @@ export default function ProductPage({ params }: PageProps) {
   };
 
   const handleAddToCart = () => {
-    const imageUrl = product.images?.[selectedImageIndex]?.image_url || product.image_url || '';
+    const imageUrl = product.images?.[selectedImageIndex] || product.image_url || '';
     const productToAdd = {
       id: product.id, // already a string UUID
       name: product.name,
@@ -87,7 +87,7 @@ export default function ProductPage({ params }: PageProps) {
   };
 
   const handleBuyNow = () => {
-    const imageUrl = product.images?.[selectedImageIndex]?.image_url || product.image_url || '';
+    const imageUrl = product.images?.[selectedImageIndex] || product.image_url || '';
     const productToAdd = {
       id: product.id, // already a string UUID
       name: product.name,
@@ -116,7 +116,7 @@ export default function ProductPage({ params }: PageProps) {
   };
 
   // Map images to URLs for display
-  const imageUrls = product.images?.map(img => img.image_url) || [];
+  const imageUrls = product.images || [];
   const mainImageUrl = imageUrls[selectedImageIndex] || product.image_url || '';
 
   return (
@@ -202,14 +202,14 @@ export default function ProductPage({ params }: PageProps) {
               <span className="text-4xl font-bold text-gray-900 dark:text-white">
                 ৳{product.price.toFixed(2)}
               </span>
-              {product.originalPrice && (
+              {product.original_price && (
                 <span className="text-xl text-gray-500 dark:text-gray-400 line-through">
-                  ৳{product.originalPrice.toFixed(2)}
+                  ৳{product.original_price.toFixed(2)}
                 </span>
               )}
-              {product.originalPrice && (
+              {product.original_price && (
                 <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm font-bold">
-                  Save ৳{(product.originalPrice - product.price).toFixed(2)}
+                  Save ৳{(product.original_price - product.price).toFixed(2)}
                 </span>
               )}
             </div>

@@ -1,9 +1,11 @@
 "use client";
 
 import AdminDashboardLayout from "@/components/AdminDashboardLayout";
-import { Package, Plus, Search, Filter, Edit, Trash2, Eye, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import ImageUploader from "@/components/ImageUploader";
+import { Package, Plus, Search, Filter, Edit, Trash2, Eye, ChevronLeft, ChevronRight, Loader2, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Product, Category, fetchProducts, deleteProduct, getProductStats, getAllCategories, createProduct, updateProduct } from "@/lib/products";
+import { uploadProductImages } from "@/lib/upload";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminProductsPage() {
@@ -28,6 +30,9 @@ export default function AdminProductsPage() {
     sku: "",
     is_active: true,
   });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -83,29 +88,85 @@ export default function AdminProductsPage() {
       return;
     }
 
-    const newProduct = await createProduct(formData);
-    if (newProduct) {
-      setProducts([newProduct, ...products]);
-      setShowAddModal(false);
-      resetForm();
-      // Refresh stats
-      const newStats = await getProductStats();
-      setStats(newStats);
+    setUploading(true);
+    try {
+      // Upload images if any
+      let imageUrls: string[] = [];
+      if (selectedFiles.length > 0) {
+        imageUrls = await uploadProductImages(selectedFiles);
+        if (imageUrls.length === 0) {
+          alert("Failed to upload images. Please try again.");
+          setUploading(false);
+          return;
+        }
+      }
+
+      // Create product with images array
+      const productData = {
+        ...formData,
+        images: imageUrls,
+        // Keep image_url for backward compatibility (use first image if available)
+        image_url: imageUrls.length > 0 ? imageUrls[0] : formData.image_url,
+      };
+
+      const newProduct = await createProduct(productData);
+      if (newProduct) {
+        setProducts([newProduct, ...products]);
+        setShowAddModal(false);
+        resetForm();
+        // Refresh stats
+        const newStats = await getProductStats();
+        setStats(newStats);
+      }
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Failed to add product. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleEditProduct = async () => {
     if (!editingProduct || !formData.name || formData.price <= 0) return;
 
-    const updatedProduct = await updateProduct(editingProduct.id, formData);
-    if (updatedProduct) {
-      setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
-      setShowEditModal(false);
-      setEditingProduct(null);
-      resetForm();
-      // Refresh stats
-      const newStats = await getProductStats();
-      setStats(newStats);
+    setUploading(true);
+    try {
+      // Upload new images if any
+      let newImageUrls: string[] = [];
+      if (selectedFiles.length > 0) {
+        newImageUrls = await uploadProductImages(selectedFiles);
+        // Continue even if some uploads fail, but warn user
+        if (newImageUrls.length === 0 && selectedFiles.length > 0) {
+          alert("Warning: No new images were uploaded. Continuing with existing images.");
+        }
+      }
+
+      // Combine existing images with new ones
+      const allImages = [...existingImages, ...newImageUrls];
+
+      // Update product with images array
+      const updateData = {
+        ...formData,
+        images: allImages,
+        // Keep image_url for backward compatibility (use first image if available)
+        image_url: allImages.length > 0 ? allImages[0] : formData.image_url,
+      };
+
+      const updatedProduct = await updateProduct(editingProduct.id, updateData);
+      if (updatedProduct) {
+        setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
+        setShowEditModal(false);
+        setEditingProduct(null);
+        resetForm();
+        // Refresh stats
+        const newStats = await getProductStats();
+        setStats(newStats);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+      alert("Failed to update product. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -121,6 +182,17 @@ export default function AdminProductsPage() {
       sku: "",
       is_active: true,
     });
+    setSelectedFiles([]);
+    setExistingImages([]);
+    setUploading(false);
+  };
+
+  const handleFilesChange = (files: File[]) => {
+    setSelectedFiles(files);
+  };
+
+  const handleRemoveExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const openEditModal = (product: Product) => {
@@ -136,6 +208,10 @@ export default function AdminProductsPage() {
       sku: product.sku || "",
       is_active: product.is_active ?? true,
     });
+    // Set existing images from product.images or fallback to image_url
+    const existing = product.images || (product.image_url ? [product.image_url] : []);
+    setExistingImages(existing);
+    setSelectedFiles([]);
     setShowEditModal(true);
   };
 
@@ -430,7 +506,7 @@ export default function AdminProductsPage() {
         {/* Add Product Modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Product</h3>
                 <div className="space-y-4">
@@ -506,14 +582,15 @@ export default function AdminProductsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      placeholder="https://example.com/image.jpg"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Images</label>
+                    <ImageUploader
+                      onFilesChange={handleFilesChange}
+                      existingImages={[]}
+                      maxFiles={10}
                     />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Upload multiple images for product gallery. First image will be used as main product image.
+                    </p>
                   </div>
                   <div className="flex items-center">
                     <input
@@ -532,14 +609,23 @@ export default function AdminProductsPage() {
                   <button
                     onClick={() => setShowAddModal(false)}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    disabled={uploading}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAddProduct}
-                    className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+                    disabled={uploading}
+                    className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >
-                    Add Product
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Uploading...
+                      </>
+                    ) : (
+                      'Add Product'
+                    )}
                   </button>
                 </div>
               </div>
@@ -550,7 +636,7 @@ export default function AdminProductsPage() {
         {/* Edit Product Modal */}
         {showEditModal && editingProduct && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Product</h3>
                 <div className="space-y-4">
@@ -626,13 +712,12 @@ export default function AdminProductsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      placeholder="https://example.com/image.jpg"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Images</label>
+                    <ImageUploader
+                      onFilesChange={handleFilesChange}
+                      existingImages={existingImages}
+                      onRemoveExistingImage={handleRemoveExistingImage}
+                      maxFiles={10}
                     />
                   </div>
                   <div className="flex items-center">
@@ -660,9 +745,17 @@ export default function AdminProductsPage() {
                   </button>
                   <button
                     onClick={handleEditProduct}
-                    className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+                    className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center justify-center min-w-[120px]"
+                    disabled={uploading}
                   >
-                    Update Product
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Update Product'
+                    )}
                   </button>
                 </div>
               </div>

@@ -36,6 +36,14 @@ CREATE POLICY "Users can insert their own profile"
   ON users FOR INSERT 
   WITH CHECK (auth.uid() = id);
 
+-- Allow any authenticated user to read basic user profiles (use cautiously)
+CREATE POLICY "Authenticated users can view user profiles" 
+  ON users FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- Ensure the Postgres role `authenticated` has SELECT privilege
+GRANT SELECT ON users TO authenticated;
+
 -- Products table
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -44,6 +52,7 @@ CREATE TABLE IF NOT EXISTS products (
   price DECIMAL(10, 2) NOT NULL,
   original_price DECIMAL(10, 2),
   image_url TEXT,
+  images TEXT[] DEFAULT '{}',
   category TEXT,
   stock INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -118,7 +127,8 @@ CREATE POLICY "Authenticated users can modify banners"
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS category_id UUID REFERENCES categories(id),
 ADD COLUMN IF NOT EXISTS sku TEXT UNIQUE,
-ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true,
+ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
 
 -- Insert default categories
 INSERT INTO categories (id, name, description) VALUES
@@ -134,7 +144,7 @@ CREATE TABLE IF NOT EXISTS orders (
   order_number TEXT UNIQUE NOT NULL DEFAULT 'ORD-' || to_char(NOW(), 'YYYYMMDD') || '-' || lpad(floor(random() * 10000)::text, 4, '0'),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   total_amount DECIMAL(10, 2) NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
   payment_method TEXT NOT NULL DEFAULT 'cash_on_delivery',
   shipping_address TEXT,
   billing_address TEXT,
@@ -145,21 +155,58 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS customer_name TEXT,
+ADD COLUMN IF NOT EXISTS phone TEXT;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'orders'
+      AND column_name = 'status'
+  ) THEN
+    ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check;
+    ALTER TABLE orders ADD CONSTRAINT orders_status_check
+      CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'));
+  END IF;
+END $$;
+
 -- Enable RLS for orders
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
 -- Users can only see their own orders
+DROP POLICY IF EXISTS "Users can view their own orders" ON orders;
 CREATE POLICY "Users can view their own orders" 
   ON orders FOR SELECT 
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own orders" ON orders;
 CREATE POLICY "Users can insert their own orders" 
   ON orders FOR INSERT 
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own orders" ON orders;
 CREATE POLICY "Users can update their own orders" 
   ON orders FOR UPDATE 
   USING (auth.uid() = user_id);
+
+-- Allow any authenticated user to read orders (adjust if you want stricter privacy)
+DROP POLICY IF EXISTS "Authenticated users can view orders" ON orders;
+CREATE POLICY "Authenticated users can view orders" 
+  ON orders FOR SELECT
+  USING (auth.role() = 'authenticated' OR auth.uid() = user_id);
+
+-- Allow authenticated admins/panel users to update order status and tracking.
+DROP POLICY IF EXISTS "Authenticated users can update orders" ON orders;
+CREATE POLICY "Authenticated users can update orders"
+  ON orders FOR UPDATE
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
+
+GRANT SELECT, UPDATE ON orders TO authenticated;
 
 -- Order items table (for products in orders)
 CREATE TABLE IF NOT EXISTS order_items (
@@ -175,9 +222,23 @@ CREATE TABLE IF NOT EXISTS order_items (
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
 -- Users can only see order items for their own orders
+DROP POLICY IF EXISTS "Users can view their own order items" ON order_items;
 CREATE POLICY "Users can view their own order items" 
   ON order_items FOR SELECT 
   USING (EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.user_id = auth.uid()));
+
+-- Allow authenticated users to read order items (so client can fetch items when authorized)
+DROP POLICY IF EXISTS "Authenticated users can view order items" ON order_items;
+CREATE POLICY "Authenticated users can view order items" 
+  ON order_items FOR SELECT
+  USING (auth.role() = 'authenticated' OR EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Users can insert their own order items" ON order_items;
+CREATE POLICY "Users can insert their own order items"
+  ON order_items FOR INSERT
+  WITH CHECK (EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.user_id = auth.uid()));
+
+GRANT SELECT, INSERT ON order_items TO authenticated;
 
 -- Wishlist table
 CREATE TABLE IF NOT EXISTS wishlist (

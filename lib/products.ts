@@ -7,6 +7,7 @@ export type Product = {
   price: number;
   original_price?: number;
   image_url?: string;
+  images?: string[];
   category?: string;
   category_id?: string;
   stock: number;
@@ -18,8 +19,6 @@ export type Product = {
   fabric?: string;
   sizes?: string[];
   colors?: Array<{ name: string; value: string }>;
-  // Product images array for gallery
-  images?: Array<{ id: string; image_url: string; alt_text?: string }>;
 };
 
 export type Category = {
@@ -143,6 +142,9 @@ export async function fetchProductById(id: string): Promise<Product | null> {
 // Create new product
 export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product | null> {
   try {
+    // Convert image_url to images array for backward compatibility
+    const images = product.images || (product.image_url ? [product.image_url] : []);
+    
     const { data, error } = await supabase
       .from('products')
       .insert([{
@@ -150,7 +152,8 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         description: product.description,
         price: product.price,
         original_price: product.original_price,
-        image_url: product.image_url,
+        image_url: product.image_url, // Keep for backward compatibility
+        images: images,
         category_id: product.category_id,
         stock: product.stock || 0,
         sku: product.sku,
@@ -174,20 +177,40 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
 // Update product
 export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
   try {
+    // Handle images update - if images is provided, use it; if image_url is provided but images is not, convert
+    let images = updates.images;
+    if (updates.image_url !== undefined && updates.images === undefined) {
+      // If updating image_url but not images, we need to fetch current product to preserve existing images
+      // For simplicity, we'll just set images to [updates.image_url] if image_url is being set
+      // In a real scenario, you might want to merge with existing images
+      images = updates.image_url ? [updates.image_url] : [];
+    }
+    
+    const updateData: any = {
+      name: updates.name,
+      description: updates.description,
+      price: updates.price,
+      original_price: updates.original_price,
+      category_id: updates.category_id,
+      stock: updates.stock,
+      sku: updates.sku,
+      is_active: updates.is_active,
+      updated_at: new Date().toISOString(),
+    };
+    
+    // Only include image_url if provided (for backward compatibility)
+    if (updates.image_url !== undefined) {
+      updateData.image_url = updates.image_url;
+    }
+    
+    // Only include images if provided
+    if (images !== undefined) {
+      updateData.images = images;
+    }
+    
     const { data, error } = await supabase
       .from('products')
-      .update({
-        name: updates.name,
-        description: updates.description,
-        price: updates.price,
-        original_price: updates.original_price,
-        image_url: updates.image_url,
-        category_id: updates.category_id,
-        stock: updates.stock,
-        sku: updates.sku,
-        is_active: updates.is_active,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -232,22 +255,29 @@ export async function getProductStats(): Promise<{
   categories: number;
 }> {
   try {
-    const { data: products, error } = await supabase
+    // Fetch products with safe query
+    const { data: products, error: productsError } = await supabase
       .from('products')
       .select('stock, is_active');
 
-    if (error) {
-      console.error('Error fetching product stats:', error);
-      return { total: 0, outOfStock: 0, lowStock: 0, categories: 0 };
+    if (productsError) {
+      console.error('Error fetching products for stats:', productsError);
+      // Return safe defaults but continue to try fetching categories
     }
 
-    const total = products?.length || 0;
-    const outOfStock = products?.filter(p => p.stock === 0).length || 0;
-    const lowStock = products?.filter(p => p.stock > 0 && p.stock <= 10).length || 0;
+    const productsData = products || [];
+    const total = productsData.length;
+    const outOfStock = productsData.filter(p => p.stock === 0).length;
+    const lowStock = productsData.filter(p => p.stock > 0 && p.stock <= 10).length;
 
-    const { data: categories } = await supabase
+    // Fetch categories with safe query
+    const { data: categories, error: categoriesError } = await supabase
       .from('categories')
       .select('id', { count: 'exact' });
+
+    if (categoriesError) {
+      console.error('Error fetching categories for stats:', categoriesError);
+    }
 
     return {
       total,
@@ -256,7 +286,8 @@ export async function getProductStats(): Promise<{
       categories: categories?.length || 0,
     };
   } catch (error) {
-    console.error('Failed to fetch product stats:', error);
+    console.error('Unexpected error in getProductStats:', error);
+    // Always return safe default values to prevent UI crash
     return { total: 0, outOfStock: 0, lowStock: 0, categories: 0 };
   }
 }
