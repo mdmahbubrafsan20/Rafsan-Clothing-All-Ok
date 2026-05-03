@@ -131,7 +131,7 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium leading-none text-gray-900">৳{product.price.toFixed(2)}</span>
+            <span className="text-base font-semibold leading-none text-gray-900">৳{product.price.toFixed(2)}</span>
             {hasDiscount && product.original_price && (
               <span className="text-[14px] text-gray-400 line-through">৳{product.original_price.toFixed(2)}</span>
             )}
