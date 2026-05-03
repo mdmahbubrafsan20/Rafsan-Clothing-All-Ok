@@ -59,7 +59,7 @@ export default function MenCategoryPage() {
               Discover trendy and comfortable clothing for men
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-4 lg:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-white dark:bg-zinc-800 rounded-lg md:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-700 shadow-sm animate-pulse">
                 <div className="aspect-square bg-gray-200 dark:bg-zinc-700"></div>
@@ -123,7 +123,7 @@ export default function MenCategoryPage() {
         </div>
 
         {/* Product grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-4 lg:gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

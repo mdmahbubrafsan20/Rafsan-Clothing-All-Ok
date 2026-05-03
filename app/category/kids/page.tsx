@@ -59,7 +59,7 @@ export default function KidsCategoryPage() {
               Adorable and comfortable clothing for children
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm animate-pulse">
                 <div className="aspect-square bg-gray-200"></div>
@@ -123,7 +123,7 @@ export default function KidsCategoryPage() {
         </div>
 
         {/* Product grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

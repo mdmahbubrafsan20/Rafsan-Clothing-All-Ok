@@ -56,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-gray-300 max-md:shadow max-md:bg-white">
+    <div className="group relative bg-white dark:bg-zinc-900 rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-0 max-md:shadow-none max-md:bg-white max-md:rounded-none">
       <Link href={`/product/${product.id}`} className="block">
         {/* DISCOUNT BADGE */}
         {hasDiscount && (
@@ -77,7 +77,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </button>
 
         {/* IMAGE CONTAINER */}
-        <div className="relative aspect-square bg-gray-100 dark:bg-zinc-800 overflow-hidden">
+        <div className="relative aspect-square bg-gray-100 dark:bg-zinc-800 overflow-hidden max-md:bg-white">
           <Image
             src={imageToShow}
             alt={product.name}
