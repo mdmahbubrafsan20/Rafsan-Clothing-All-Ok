@@ -56,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-gray-300 max-md:shadow">
+    <div className="group relative bg-white dark:bg-zinc-900 rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-gray-300 max-md:shadow max-md:bg-white">
       <Link href={`/product/${product.id}`} className="block">
         {/* DISCOUNT BADGE */}
         {hasDiscount && (
@@ -86,10 +86,24 @@ export default function ProductCard({ product }: { product: Product }) {
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
             onError={() => setImageError(true)}
           />
+          
+          {/* MOBILE PRICE OVERLAY */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 max-md:block md:hidden">
+            <div className="flex items-center justify-between">
+              <span className="text-white font-bold text-sm">
+                ৳{product.price.toFixed(2)}
+              </span>
+              {hasDiscount && product.original_price && (
+                <span className="text-white/80 text-xs line-through">
+                  ৳{product.original_price.toFixed(2)}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* CONTENT */}
-        <div className="p-2 md:p-3 lg:p-4 space-y-1 md:space-y-1.5 lg:space-y-2">
+        {/* CONTENT - hidden on mobile, shown on desktop */}
+        <div className="p-2 md:p-3 lg:p-4 space-y-1 md:space-y-1.5 lg:space-y-2 max-md:hidden">
           {/* PRICE ROW */}
           <div className="flex items-center gap-1 md:gap-1.5">
             <span className="text-sm md:text-lg lg:text-xl font-bold text-gray-900 dark:text-zinc-50">

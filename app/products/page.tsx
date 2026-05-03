@@ -66,7 +66,7 @@ function ProductsContent() {
   }, [selectedCategory, searchQuery, products]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900">
+    <div className="min-h-screen bg-white dark:bg-zinc-900 max-md:bg-white">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Page header with search */}
         <div className="mb-8">
@@ -232,7 +232,7 @@ function ProductsContent() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-4 lg:gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

@@ -51,7 +51,7 @@ export default function MenCategoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-zinc-900">
+      <div className="min-h-screen bg-white dark:bg-zinc-900 max-md:bg-white">
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Men Collection</h1>
@@ -59,7 +59,7 @@ export default function MenCategoryPage() {
               Discover trendy and comfortable clothing for men
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-4 lg:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-white dark:bg-zinc-800 rounded-lg md:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-700 shadow-sm animate-pulse">
                 <div className="aspect-square bg-gray-200 dark:bg-zinc-700"></div>
@@ -77,7 +77,7 @@ export default function MenCategoryPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-zinc-900">
+      <div className="min-h-screen bg-white dark:bg-zinc-900 max-md:bg-white">
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Men Collection</h1>
@@ -95,7 +95,7 @@ export default function MenCategoryPage() {
 
   if (!products || products.length === 0) {
     return (
-      <div className="min-h-screen bg-white dark:bg-zinc-900">
+      <div className="min-h-screen bg-white dark:bg-zinc-900 max-md:bg-white">
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Men Collection</h1>
@@ -112,7 +112,7 @@ export default function MenCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900">
+    <div className="min-h-screen bg-white dark:bg-zinc-900 max-md:bg-white">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Page header */}
         <div className="mb-6 md:mb-8">
@@ -123,7 +123,7 @@ export default function MenCategoryPage() {
         </div>
 
         {/* Product grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-4 lg:gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

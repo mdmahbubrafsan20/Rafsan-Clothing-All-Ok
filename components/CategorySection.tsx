@@ -15,7 +15,7 @@ export default function CategorySection() {
   ];
 
   return (
-    <section className="px-4 py-6 md:py-8">
+    <section className="px-3 py-6 md:py-8 max-md:px-3">
       {/* Single container for all screen sizes with order control */}
       <div className="space-y-4 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
         {/* Banner 1 - Mobile: order-1, Desktop: first column */}
@@ -48,9 +48,9 @@ export default function CategorySection() {
 
         {/* Custom Apparel text block */}
         {/* Mobile: order-3 (below both banners), Desktop: order-2 (between banners) with col-span-2 */}
-        <div className="bg-teal-100 dark:bg-teal-900/30 rounded-xl p-4 text-center order-3 md:order-2 md:col-span-2">
-          <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Custom Apparel</h3>
-          <p className="text-gray-700 dark:text-gray-300 mt-1 text-base md:text-lg">
+        <div className="bg-teal-100 dark:bg-teal-900/30 rounded-xl p-4 text-center order-3 md:order-2 md:col-span-2 max-md:bg-teal-100 max-md:text-left">
+          <h3 className="text-base md:text-xl font-bold text-gray-900 dark:text-white max-md:text-gray-900">Custom Apparel</h3>
+          <p className="text-gray-700 dark:text-gray-300 mt-1 text-sm md:text-lg max-md:text-gray-700">
             We provide plain t-shirts and apparel for all your custom branding needs
           </p>
         </div>
