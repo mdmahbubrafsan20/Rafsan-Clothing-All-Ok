@@ -8,12 +8,12 @@ export default async function Home() {
   const products = await fetchProducts();
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
+    <>
       <HeroSlider />
       <div className="mb-2 md:mb-3">
         <CategorySection />
       </div>
-      <main className="pt-2 pb-6 px-4 sm:px-6 lg:px-8 lg:max-w-7xl lg:mx-auto">
+      <div className="pt-2 pb-6">
         {products.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-500 dark:text-zinc-400">
@@ -24,14 +24,14 @@ export default async function Home() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}
-      </main>
+      </div>
       <BottomNav />
-    </div>
+    </>
   );
 }

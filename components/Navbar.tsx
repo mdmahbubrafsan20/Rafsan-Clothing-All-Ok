@@ -50,9 +50,9 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 h-16">
       {/* Mobile Navbar (visible on small screens) */}
-      <div className="relative flex items-center justify-between px-4 py-2 md:hidden">
-        {/* LEFT */}
-        <div>
+      <div className="relative flex items-center justify-between px-4 py-3 md:hidden">
+        {/* LEFT - Menu button */}
+        <div className="flex-1 flex items-center">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 rounded-md hover:bg-gray-100 transition-colors"
@@ -62,33 +62,15 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* CENTER (Perfectly centered logo) */}
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <Link href="/" className="font-bold text-lg">
+        {/* CENTER - Logo */}
+        <div className="flex-1 flex justify-center">
+          <Link href="/" className="font-bold text-lg text-center">
             Rafsan Clothing
           </Link>
         </div>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-4">
-          {/* Search icon ONLY */}
-          <button
-            className="p-2 rounded-md hover:bg-gray-100 transition-colors"
-            aria-label="Search"
-            onClick={() => setShowMobileSearch(!showMobileSearch)}
-          >
-            <Search className="w-5 h-5 text-gray-700" />
-          </button>
-
-          {/* User icon */}
-          <Link
-            href={user ? "/account/dashboard" : "/login"}
-            className="p-2 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
-            aria-label="Profile"
-          >
-            <User className="w-5 h-5 text-gray-700" />
-          </Link>
-
+        {/* RIGHT - Icons */}
+        <div className="flex-1 flex items-center justify-end gap-3">
           {/* Cart icon */}
           <Link
             href="/cart"
@@ -102,6 +84,15 @@ export default function Navbar() {
               </span>
             )}
           </Link>
+
+          {/* Search icon - moved to where user icon was */}
+          <button
+            className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+            aria-label="Search"
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+          >
+            <Search className="w-5 h-5 text-gray-700" />
+          </button>
         </div>
         {/* Mobile search input */}
         {showMobileSearch && (
@@ -166,7 +157,7 @@ export default function Navbar() {
 
         {/* Right: Search bar + Icons */}
         <div className="flex items-center gap-6">
-          {/* Search bar */}
+          {/* Search bar - hidden on mobile, shown on lg and up */}
           <form onSubmit={handleSearchSubmit} className="relative hidden lg:flex">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -178,28 +169,14 @@ export default function Navbar() {
             />
           </form>
 
-          {/* Search icon (mobile) */}
-          <div className="lg:hidden relative">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleMobileSearch();
-                }
-              }}
-              className="pl-3 pr-10 py-1 w-32 border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-black"
-            />
-            <button
-              onClick={handleMobileSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1"
-              aria-label="Search"
-            >
-              <Search className="w-4 h-4 text-gray-500" />
-            </button>
-          </div>
+          {/* Search icon for md to lg screens (tablet) - shows icon only */}
+          <button
+            className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+            aria-label="Search"
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+          >
+            <Search className="w-5 h-5 text-gray-700" />
+          </button>
 
           {/* Profile icon */}
           <Link

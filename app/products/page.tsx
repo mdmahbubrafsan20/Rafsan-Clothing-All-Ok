@@ -66,8 +66,8 @@ function ProductsContent() {
   }, [selectedCategory, searchQuery, products]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-white dark:bg-zinc-900">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Page header with search */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -106,7 +106,7 @@ function ProductsContent() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors ${
                     selectedCategory === category
                       ? "bg-black text-white"
                       : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-300"
@@ -191,7 +191,7 @@ function ProductsContent() {
           {/* Main product grid */}
           <div className="flex-1">
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
@@ -200,14 +200,14 @@ function ProductsContent() {
                 ))}
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
-                  <Search className="h-12 w-12 text-gray-400" />
+              <div className="text-center py-12 md:py-16">
+                <div className="mx-auto w-20 h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4 md:mb-6">
+                  <Search className="h-10 w-10 md:h-12 md:w-12 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   No products found
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
                   {searchQuery
                     ? `No products match "${searchQuery}". Try a different search term.`
                     : selectedCategory !== "all"
@@ -217,14 +217,14 @@ function ProductsContent() {
                 <div className="flex flex-wrap gap-3 justify-center">
                   <button
                     onClick={() => setSelectedCategory("all")}
-                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+                    className="px-5 py-2 text-sm md:text-base bg-black text-white rounded-lg hover:bg-gray-800"
                   >
                     Show All Products
                   </button>
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                      className="px-5 py-2 text-sm md:text-base border border-gray-300 rounded-lg hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
                     >
                       Clear Search
                     </button>
@@ -232,7 +232,7 @@ function ProductsContent() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

@@ -56,12 +56,12 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-zinc-900 rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-gray-300 max-md:shadow">
       <Link href={`/product/${product.id}`} className="block">
         {/* DISCOUNT BADGE */}
         {hasDiscount && (
-          <div className="absolute top-3 left-3 z-20">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-600 text-white">
+          <div className="absolute top-1.5 left-1.5 z-20 md:top-3 md:left-3">
+            <span className="inline-flex items-center px-1.5 py-0.5 md:px-3 md:py-1 rounded text-[10px] md:text-xs font-bold bg-red-600 text-white">
               -{discountPercent}%
             </span>
           </div>
@@ -70,10 +70,10 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* ADD TO CART BUTTON - appears on hover */}
         <button
           onClick={handleAddToCart}
-          className="absolute top-3 right-3 z-20 p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black hover:text-white"
+          className="absolute top-1.5 right-1.5 z-20 p-1 md:p-1.5 lg:p-2 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black hover:text-white max-md:opacity-100 max-md:bg-white/90 max-md:backdrop-blur-sm"
           aria-label="Add to cart"
         >
-          <ShoppingBag className="w-5 h-5" />
+          <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-5 lg:h-5" />
         </button>
 
         {/* IMAGE CONTAINER */}
@@ -89,34 +89,34 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* CONTENT */}
-        <div className="p-4 space-y-2">
+        <div className="p-2 md:p-3 lg:p-4 space-y-1 md:space-y-1.5 lg:space-y-2">
           {/* PRICE ROW */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xl font-bold text-gray-900 dark:text-zinc-50">
+          <div className="flex items-center gap-1 md:gap-1.5">
+            <span className="text-sm md:text-lg lg:text-xl font-bold text-gray-900 dark:text-zinc-50">
               ৳{product.price.toFixed(2)}
             </span>
 
             {hasDiscount && product.original_price && (
-              <span className="text-sm text-gray-500 dark:text-zinc-500 line-through">
+              <span className="text-[10px] md:text-xs lg:text-sm text-gray-500 dark:text-zinc-500 line-through">
                 ৳{product.original_price.toFixed(2)}
               </span>
             )}
             
             {hasDiscount && product.original_price && (
-              <span className="ml-auto text-xs font-medium text-red-600 dark:text-red-400">
+              <span className="ml-auto text-[10px] md:text-xs font-medium text-red-600 dark:text-red-400">
                 Save ৳{(product.original_price - product.price).toFixed(2)}
               </span>
             )}
           </div>
 
           {/* PRODUCT NAME */}
-          <h3 className="text-sm font-medium text-gray-800 dark:text-zinc-300 line-clamp-2 leading-tight">
+          <h3 className="text-[11px] md:text-xs lg:text-sm font-medium text-gray-800 dark:text-zinc-300 line-clamp-2 leading-tight">
             {product.name}
           </h3>
 
           {/* CATEGORY/TAG */}
           {product.description && (
-            <p className="text-xs text-gray-500 dark:text-zinc-500 line-clamp-1">
+            <p className="text-[10px] md:text-xs text-gray-500 dark:text-zinc-500 line-clamp-1">
               {product.description}
             </p>
           )}
