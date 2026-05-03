@@ -56,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-0 max-md:shadow-none max-md:bg-white max-md:rounded-none">
+    <div className="group relative bg-white rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-md:border-0 max-md:shadow-none max-md:bg-white max-md:rounded-none">
       <Link href={`/product/${product.id}`} className="block">
         {/* DISCOUNT BADGE */}
         {hasDiscount && (
@@ -77,12 +77,12 @@ export default function ProductCard({ product }: { product: Product }) {
         </button>
 
         {/* IMAGE CONTAINER */}
-        <div className="relative aspect-square bg-gray-100 dark:bg-zinc-800 overflow-hidden max-md:bg-white">
+        <div className="relative aspect-square bg-white overflow-hidden p-0 m-0">
           <Image
             src={imageToShow}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
             onError={() => setImageError(true)}
           />
@@ -106,31 +106,31 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="p-2 md:p-3 lg:p-4 space-y-1 md:space-y-1.5 lg:space-y-2 max-md:hidden">
           {/* PRICE ROW */}
           <div className="flex items-center gap-1 md:gap-1.5">
-            <span className="text-sm md:text-lg lg:text-xl font-bold text-gray-900 dark:text-zinc-50">
+            <span className="text-sm md:text-lg lg:text-xl font-bold text-gray-900">
               ৳{product.price.toFixed(2)}
             </span>
 
             {hasDiscount && product.original_price && (
-              <span className="text-[10px] md:text-xs lg:text-sm text-gray-500 dark:text-zinc-500 line-through">
+              <span className="text-[10px] md:text-xs lg:text-sm text-gray-500 line-through">
                 ৳{product.original_price.toFixed(2)}
               </span>
             )}
             
             {hasDiscount && product.original_price && (
-              <span className="ml-auto text-[10px] md:text-xs font-medium text-red-600 dark:text-red-400">
+              <span className="ml-auto text-[10px] md:text-xs font-medium text-red-600">
                 Save ৳{(product.original_price - product.price).toFixed(2)}
               </span>
             )}
           </div>
 
           {/* PRODUCT NAME */}
-          <h3 className="text-[11px] md:text-xs lg:text-sm font-medium text-gray-800 dark:text-zinc-300 line-clamp-2 leading-tight">
+          <h3 className="text-[11px] md:text-xs lg:text-sm font-medium text-gray-800 line-clamp-2 leading-tight">
             {product.name}
           </h3>
 
           {/* CATEGORY/TAG */}
           {product.description && (
-            <p className="text-[10px] md:text-xs text-gray-500 dark:text-zinc-500 line-clamp-1">
+            <p className="text-[10px] md:text-xs text-gray-500 line-clamp-1">
               {product.description}
             </p>
           )}
