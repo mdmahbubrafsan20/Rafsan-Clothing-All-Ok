@@ -156,33 +156,33 @@ export default function CheckoutPage() {
   const total = subtotal + deliveryCost;
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
+    <div className="min-h-screen bg-zinc-50 font-sans">
       <main className="pt-6 pb-20 px-4 sm:px-6 lg:px-8 lg:max-w-7xl lg:mx-auto">
         {/* Back button */}
         <div className="mb-6">
           <Link 
             href="/cart" 
-            className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Link>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Checkout</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
         {cart.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-sm text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 shadow-sm text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
               <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">Add items to your cart before proceeding to checkout.</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
+            <p className="text-gray-600 mb-6">Add items to your cart before proceeding to checkout.</p>
             <Link 
               href="/" 
-              className="inline-block px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+              className="inline-block px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
             >
               Continue Shopping
             </Link>
@@ -190,12 +190,12 @@ export default function CheckoutPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left: Customer Form */}
-            <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Customer Information</h2>
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Customer Information</h2>
               
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name *
                   </label>
                   <input
@@ -203,14 +203,14 @@ export default function CheckoutPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your full name"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number *
                   </label>
                   <input
@@ -218,14 +218,14 @@ export default function CheckoutPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your phone number"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Address *
                   </label>
                   <textarea
@@ -233,14 +233,14 @@ export default function CheckoutPage() {
                     value={formData.address}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your full address"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     City *
                   </label>
                   <input
@@ -248,7 +248,7 @@ export default function CheckoutPage() {
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your city"
                     required
                   />
@@ -256,12 +256,12 @@ export default function CheckoutPage() {
               </div>
 
               {/* Delivery Options */}
-              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-700">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Delivery Option</h2>
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Delivery Option</h2>
                 
                 <div className="space-y-3">
                   <div 
-                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${deliveryOption === "inside" ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-zinc-700"}`}
+                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${deliveryOption === "inside" ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
                     onClick={() => setDeliveryOption("inside")}
                   >
                     <div className="flex items-center">
@@ -269,15 +269,15 @@ export default function CheckoutPage() {
                         {deliveryOption === "inside" && <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Inside Dhaka</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Standard delivery</p>
+                        <p className="font-medium text-gray-900">Inside Dhaka</p>
+                        <p className="text-sm text-gray-500">Standard delivery</p>
                       </div>
                     </div>
-                    <span className="font-semibold text-gray-900 dark:text-white">৳60</span>
+                    <span className="font-semibold text-gray-900">৳60</span>
                   </div>
 
                   <div 
-                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${deliveryOption === "outside" ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-zinc-700"}`}
+                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${deliveryOption === "outside" ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
                     onClick={() => setDeliveryOption("outside")}
                   >
                     <div className="flex items-center">
@@ -285,25 +285,25 @@ export default function CheckoutPage() {
                         {deliveryOption === "outside" && <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Outside Dhaka</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Extended delivery</p>
+                        <p className="font-medium text-gray-900">Outside Dhaka</p>
+                        <p className="text-sm text-gray-500">Extended delivery</p>
                       </div>
                     </div>
-                    <span className="font-semibold text-gray-900 dark:text-white">৳120</span>
+                    <span className="font-semibold text-gray-900">৳120</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right: Order Summary */}
-            <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm h-fit">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Order Summary</h2>
+            <div className="bg-white rounded-xl p-6 shadow-sm h-fit">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
               
               {/* Cart Items */}
               <div className="mb-6 max-h-96 overflow-y-auto pr-2">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex items-center py-4 border-b border-gray-100 dark:border-zinc-700 last:border-0">
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 flex-shrink-0">
+                  <div key={item.id} className="flex items-center py-4 border-b border-gray-100 last:border-0">
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                       {item.image ? (
                         <Image
                           src={item.image}
@@ -321,12 +321,12 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <div className="ml-4 flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-white line-clamp-1">{item.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Quantity: {item.quantity}</p>
+                      <h3 className="font-medium text-gray-900 line-clamp-1">{item.name}</h3>
+                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-900 dark:text-white">৳{item.price * item.quantity}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">৳{item.price} each</p>
+                      <p className="font-semibold text-gray-900">৳{item.price * item.quantity}</p>
+                      <p className="text-sm text-gray-500">৳{item.price} each</p>
                     </div>
                   </div>
                 ))}
@@ -335,20 +335,20 @@ export default function CheckoutPage() {
               {/* Order Totals */}
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
-                  <span className="font-medium text-gray-900 dark:text-white">৳{subtotal}</span>
+                  <span className="text-gray-600">Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
+                  <span className="font-medium text-gray-900">৳{subtotal}</span>
                 </div>
                 
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Delivery</span>
-                  <span className="font-medium text-gray-900 dark:text-white">৳{deliveryCost}</span>
+                  <span className="text-gray-600">Delivery</span>
+                  <span className="font-medium text-gray-900">৳{deliveryCost}</span>
                 </div>
                 
-                <div className="h-px bg-gray-200 dark:bg-zinc-700 my-4"></div>
+                <div className="h-px bg-gray-200 my-4"></div>
                 
                 <div className="flex justify-between text-lg font-bold">
-                  <span className="text-gray-900 dark:text-white">Total</span>
-                  <span className="text-gray-900 dark:text-white">৳{total}</span>
+                  <span className="text-gray-900">Total</span>
+                  <span className="text-gray-900">৳{total}</span>
                 </div>
               </div>
 
@@ -356,11 +356,11 @@ export default function CheckoutPage() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={placingOrder}
-                className="w-full mt-8 py-4 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full mt-8 py-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {placingOrder ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white dark:text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -371,7 +371,7 @@ export default function CheckoutPage() {
                 )}
               </button>
 
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+              <p className="text-center text-sm text-gray-500 mt-4">
                 By placing your order, you agree to our Terms & Conditions
               </p>
             </div>

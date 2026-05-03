@@ -50,9 +50,9 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 h-16">
       {/* Mobile Navbar (visible on small screens) */}
-      <div className="relative flex items-center justify-between px-4 py-3 md:hidden">
+      <div className="relative flex items-center justify-between px-3 py-2 md:hidden">
         {/* LEFT - Menu button */}
-        <div className="flex-1 flex items-center">
+        <div className="flex w-10 items-center">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 rounded-md hover:bg-gray-100 transition-colors"
@@ -64,20 +64,24 @@ export default function Navbar() {
 
         {/* CENTER - Logo */}
         <div className="flex-1 flex justify-center">
-          <Link href="/" className="font-bold text-lg text-center">
-            Rafsan Clothing
+          <Link href="/" className="flex items-center gap-2 text-center">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-black text-sm font-bold text-white">R</span>
+            <span className="leading-tight">
+              <span className="block text-base font-bold text-black">RafSan</span>
+              <span className="block text-xs text-gray-500">Clothing</span>
+            </span>
           </Link>
         </div>
 
         {/* RIGHT - Icons */}
-        <div className="flex-1 flex items-center justify-end gap-3">
+        <div className="flex w-24 items-center justify-end gap-2">
           {/* Cart icon */}
           <Link
             href="/cart"
             className="p-2 rounded-md hover:bg-gray-100 transition-colors relative"
             aria-label="Shopping cart"
           >
-            <ShoppingBag className="w-5 h-5 text-gray-700" />
+              <ShoppingBag className="w-5 h-5 text-gray-700" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {cartCount > 9 ? "9+" : cartCount}
@@ -85,7 +89,6 @@ export default function Navbar() {
             )}
           </Link>
 
-          {/* Search icon - moved to where user icon was */}
           <button
             className="p-2 rounded-md hover:bg-gray-100 transition-colors"
             aria-label="Search"

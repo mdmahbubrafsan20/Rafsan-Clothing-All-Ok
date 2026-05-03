@@ -29,10 +29,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white dark:bg-zinc-900 max-md:bg-white max-md:text-black">
+      <body className="min-h-full flex flex-col bg-white text-zinc-900">
         <CartProvider>
           <Navbar />
-          <main className="flex-1 w-full max-w-screen-2xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <main className="flex-1 w-full max-w-screen-2xl mx-auto px-0 md:px-6 lg:px-8">
             {children}
           </main>
         </CartProvider>

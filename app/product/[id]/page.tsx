@@ -52,14 +52,14 @@ export default function ProductPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Loading product...</div>
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading product...</div>
       </div>
     );
   }
 
   if (!product) {
-    return <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">Product not found</div>;
+    return <div className="min-h-screen bg-zinc-50 flex items-center justify-center">Product not found</div>;
   }
 
   const openZoomModal = (index: number) => {
@@ -120,15 +120,15 @@ export default function ProductPage({ params }: PageProps) {
   const mainImageUrl = imageUrls[selectedImageIndex] || product.image_url || '';
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
+    <div className="min-h-screen bg-zinc-50 font-sans">
       <main className="py-6 px-4 sm:px-6 lg:px-8 lg:max-w-7xl lg:mx-auto">
         {/* Breadcrumb */}
-        <nav className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-          <Link href="/" className="hover:text-black dark:hover:text-white">Home</Link>
+        <nav className="mb-6 text-sm text-gray-600">
+          <Link href="/" className="hover:text-black">Home</Link>
           <span className="mx-2">/</span>
-          <Link href="/" className="hover:text-black dark:hover:text-white">Clothing</Link>
+          <Link href="/" className="hover:text-black">Clothing</Link>
           <span className="mx-2">/</span>
-          <span className="text-black dark:text-white">Product</span>
+          <span className="text-black">Product</span>
         </nav>
 
         {/* Product Details - 2 column layout on desktop */}
@@ -137,7 +137,7 @@ export default function ProductPage({ params }: PageProps) {
           <div>
             {/* Main Image with zoom functionality */}
             <div
-              className="relative aspect-square w-full rounded-xl overflow-hidden bg-white dark:bg-zinc-900 shadow-lg mb-4 group cursor-zoom-in"
+              className="relative aspect-square w-full rounded-xl overflow-hidden bg-white shadow-lg mb-4 group cursor-zoom-in"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
               onClick={() => openZoomModal(selectedImageIndex)}
@@ -164,10 +164,10 @@ export default function ProductPage({ params }: PageProps) {
               {imageUrls.map((imgUrl, index) => (
                 <div
                   key={index}
-                  className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer bg-white dark:bg-zinc-900 ${
+                  className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer bg-white ${
                     selectedImageIndex === index
-                      ? 'border-black dark:border-white'
-                      : 'border-transparent hover:border-gray-400 dark:hover:border-gray-600'
+                      ? 'border-black'
+                      : 'border-transparent hover:border-gray-400'
                   }`}
                   onClick={() => handleThumbnailClick(index)}
                 >
@@ -187,11 +187,11 @@ export default function ProductPage({ params }: PageProps) {
           <div className="space-y-6">
             {/* Title and SKU */}
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 {product.name}
               </h1>
               {product.sku && (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                <p className="text-gray-500 text-sm">
                   SKU: <span className="font-mono">{product.sku}</span>
                 </p>
               )}
@@ -199,46 +199,46 @@ export default function ProductPage({ params }: PageProps) {
 
             {/* Price */}
             <div className="flex items-center gap-4">
-              <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                ৳{product.price.toFixed(2)}
+              <span className="text-4xl font-bold text-gray-900">
+                à§³{product.price.toFixed(2)}
               </span>
               {product.original_price && (
-                <span className="text-xl text-gray-500 dark:text-gray-400 line-through">
-                  ৳{product.original_price.toFixed(2)}
+                <span className="text-xl text-gray-500 line-through">
+                  à§³{product.original_price.toFixed(2)}
                 </span>
               )}
               {product.original_price && (
-                <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm font-bold">
-                  Save ৳{(product.original_price - product.price).toFixed(2)}
+                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                  Save à§³{(product.original_price - product.price).toFixed(2)}
                 </span>
               )}
             </div>
 
             {/* Fabric Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 rounded-full">
-              <span className="text-gray-700 dark:text-gray-300 font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
+              <span className="text-gray-700 font-medium">
                 Fabric:
               </span>
-              <span className="font-bold text-gray-900 dark:text-white">
+              <span className="font-bold text-gray-900">
                 {product.fabric}
               </span>
             </div>
 
             {/* Size Selector */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Select Size
               </h3>
               <div className="flex flex-wrap gap-3">
                 {product.sizes?.map((size) => (
                   <button
                     key={size}
-                    className="px-5 py-3 border-2 border-gray-300 dark:border-zinc-700 rounded-lg hover:border-black dark:hover:border-white font-medium text-gray-800 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                    className="px-5 py-3 border-2 border-gray-300 rounded-lg hover:border-black font-medium text-gray-800 hover:text-black transition-colors"
                   >
                     {size}
                   </button>
                 )) ?? (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  <p className="text-gray-500 text-sm">
                     No sizes available
                   </p>
                 )}
@@ -247,7 +247,7 @@ export default function ProductPage({ params }: PageProps) {
 
             {/* Color Selector */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Select Color
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -257,15 +257,15 @@ export default function ProductPage({ params }: PageProps) {
                     className="flex flex-col items-center gap-2"
                   >
                     <div
-                      className="w-12 h-12 rounded-full border-2 border-gray-300 dark:border-zinc-700"
+                      className="w-12 h-12 rounded-full border-2 border-gray-300"
                       style={{ backgroundColor: color.value }}
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-gray-700">
                       {color.name}
                     </span>
                   </button>
                 )) ?? (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  <p className="text-gray-500 text-sm">
                     No colors available
                   </p>
                 )}
@@ -275,17 +275,17 @@ export default function ProductPage({ params }: PageProps) {
             {/* Quantity and Stock */}
             <div className="space-y-4">
               <div className="flex items-center gap-6">
-                <div className="flex items-center border border-gray-300 dark:border-zinc-700 rounded-lg">
+                <div className="flex items-center border border-gray-300 rounded-lg">
                   <button
                     onClick={decreaseQuantity}
-                    className="px-4 py-3 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white"
+                    className="px-4 py-3 text-gray-700 hover:text-black"
                   >
                     -
                   </button>
                   <span className="px-6 py-3 text-lg font-medium">{quantity}</span>
                   <button
                     onClick={increaseQuantity}
-                    className="px-4 py-3 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white"
+                    className="px-4 py-3 text-gray-700 hover:text-black"
                   >
                     +
                   </button>
@@ -294,16 +294,16 @@ export default function ProductPage({ params }: PageProps) {
                 <div className="text-sm">
                   {product.stock !== undefined && product.stock > 0 ? (
                     product.stock > 10 ? (
-                      <span className="text-green-600 dark:text-green-400 font-medium">
+                      <span className="text-green-600 font-medium">
                         In Stock ({product.stock} available)
                       </span>
                     ) : (
-                      <span className="text-amber-600 dark:text-amber-400 font-medium">
+                      <span className="text-amber-600 font-medium">
                         Low Stock - Only {product.stock} left
                       </span>
                     )
                   ) : (
-                    <span className="text-red-600 dark:text-red-400 font-medium">
+                    <span className="text-red-600 font-medium">
                       Out of Stock
                     </span>
                   )}
@@ -315,13 +315,13 @@ export default function ProductPage({ params }: PageProps) {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
                 onClick={handleBuyNow}
-                className="flex-1 py-4 px-6 bg-black dark:bg-white text-white dark:text-black font-bold rounded-lg hover:opacity-90 transition-opacity"
+                className="flex-1 py-4 px-6 bg-black text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
               >
                 Buy Now
               </button>
               <button
                 onClick={handleAddToCart}
-                className="flex-1 py-4 px-6 border-2 border-black dark:border-white text-black dark:text-white font-bold rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors"
+                className="flex-1 py-4 px-6 border-2 border-black text-black font-bold rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Add to Cart
               </button>
@@ -330,29 +330,29 @@ export default function ProductPage({ params }: PageProps) {
         </div>
 
         {/* Description Section */}
-        <div className="mt-16 pt-8 border-t border-gray-200 dark:border-zinc-800">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <div className="mt-16 pt-8 border-t border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
             DESCRIPTION
           </h2>
-          <div className="prose prose-gray dark:prose-invert max-w-none">
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+          <div className="prose prose-gray max-w-none">
+            <p className="text-gray-700 leading-relaxed">
               {product.description}
             </p>
-            <ul className="mt-6 space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="mt-6 space-y-2 text-gray-700">
               <li className="flex items-start">
-                <span className="mr-2">•</span>
+                <span className="mr-2">â€¢</span>
                 <span>100% organic cotton for maximum comfort</span>
               </li>
               <li className="flex items-start">
-                <span className="mr-2">•</span>
+                <span className="mr-2">â€¢</span>
                 <span>Pre-shrunk fabric maintains shape after washing</span>
               </li>
               <li className="flex items-start">
-                <span className="mr-2">•</span>
+                <span className="mr-2">â€¢</span>
                 <span>Reinforced stitching for durability</span>
               </li>
               <li className="flex items-start">
-                <span className="mr-2">•</span>
+                <span className="mr-2">â€¢</span>
                 <span>Classic fit suitable for all body types</span>
               </li>
             </ul>
@@ -362,12 +362,12 @@ export default function ProductPage({ params }: PageProps) {
         {/* You May Also Like */}
         <div className="mt-16">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900">
               You May Also Like
             </h2>
             <Link
               href="/"
-              className="text-black dark:text-white font-medium hover:underline"
+              className="text-black font-medium hover:underline"
             >
               View All
             </Link>

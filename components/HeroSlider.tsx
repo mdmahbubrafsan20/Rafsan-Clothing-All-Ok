@@ -49,7 +49,7 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="relative w-full h-[160px] sm:h-[220px] md:h-[280px] overflow-hidden bg-gray-100 dark:bg-zinc-900 mb-6 max-md:bg-white">
+    <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] overflow-hidden bg-gray-100 mb-4 md:mb-6">
       {/* Slides */}
       {slides.map((slide, i) => (
         <div
@@ -66,14 +66,14 @@ export default function HeroSlider() {
             }`}
           />
           <div className="absolute inset-0 bg-black/30"></div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+          <div className="absolute inset-0 flex flex-col items-start justify-end text-left text-white p-4 md:items-center md:justify-center md:text-center">
+            <h2 className="text-4xl sm:text-3xl md:text-4xl font-bold mb-1 md:mb-2">
               {slide.title}
             </h2>
             <p className="text-sm sm:text-base md:text-lg max-w-xl">
               {slide.description}
             </p>
-            <button className="mt-4 px-6 py-2 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors text-sm">
+            <button className="mt-3 px-5 py-1.5 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors text-xs md:mt-4 md:px-6 md:py-2 md:text-sm">
               Shop Now
             </button>
           </div>
@@ -83,7 +83,7 @@ export default function HeroSlider() {
       {/* Navigation arrows */}
       <button
         onClick={goToPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-colors"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors"
         aria-label="Previous slide"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -92,7 +92,7 @@ export default function HeroSlider() {
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors"
         aria-label="Next slide"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -101,7 +101,7 @@ export default function HeroSlider() {
       </button>
 
       {/* Dots indicator */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
         {slides.map((_, i) => (
           <button
             key={i}

@@ -10,13 +10,13 @@ export default async function Home() {
   return (
     <>
       <HeroSlider />
-      <div className="mb-2 md:mb-3">
+      <div className="mb-1 md:mb-3">
         <CategorySection />
       </div>
-      <div className="pt-2 pb-6">
+      <div className="pt-1 pb-20 md:pb-6">
         {products.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-500 dark:text-zinc-400">
+            <div className="text-gray-500">
               <p className="text-lg">No products found.</p>
               <p className="mt-2">
                 Make sure you have set up your Supabase environment variables and have products in your database.
@@ -24,10 +24,12 @@ export default async function Home() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-3 lg:gap-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="px-4 py-6 md:px-0 md:py-0">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-3 lg:gap-4">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
         )}
       </div>

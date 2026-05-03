@@ -66,16 +66,16 @@ function ProductsContent() {
   }, [selectedCategory, searchQuery, products]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900 max-md:bg-white">
+    <div className="min-h-screen bg-white max-md:bg-white">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Page header with search */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900">
                 All Products
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-gray-600 mt-2">
                 Discover our latest collection of premium clothing
               </p>
             </div>
@@ -90,7 +90,7 @@ function ProductsContent() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent dark:bg-zinc-900 dark:border-zinc-700 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
           </div>
@@ -99,7 +99,7 @@ function ProductsContent() {
           <div className="lg:hidden mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Filter className="h-5 w-5 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by:</span>
+              <span className="text-sm font-medium text-gray-700">Filter by:</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
@@ -109,7 +109,7 @@ function ProductsContent() {
                   className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors ${
                     selectedCategory === category
                       ? "bg-black text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-300"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
                 >
                   {category === "all" ? "All" : category.charAt(0).toUpperCase() + category.slice(1)}
@@ -120,7 +120,7 @@ function ProductsContent() {
 
           {/* Results count */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               Showing <span className="font-semibold">{filteredProducts.length}</span> product{filteredProducts.length !== 1 ? "s" : ""}
               {selectedCategory !== "all" && ` in ${selectedCategory}`}
               {searchQuery && ` matching "${searchQuery}"`}
@@ -131,7 +131,7 @@ function ProductsContent() {
                   setSelectedCategory("all");
                   setSearchQuery("");
                 }}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Clear all filters
               </button>
@@ -144,7 +144,7 @@ function ProductsContent() {
           {/* Sidebar - hidden on mobile, visible on desktop */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-24">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">
                 Categories
               </h2>
               <ul className="space-y-2">
@@ -154,7 +154,7 @@ function ProductsContent() {
                       className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
                         selectedCategory === category
                           ? "bg-black text-white"
-                          : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-zinc-800"
+                          : "text-gray-700 hover:bg-gray-100"
                       }`}
                       onClick={() => setSelectedCategory(category)}
                     >
@@ -162,7 +162,7 @@ function ProductsContent() {
                         <span className="font-medium">
                           {category === "all" ? "All Products" : category.charAt(0).toUpperCase() + category.slice(1)}
                         </span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="text-sm text-gray-500">
                           {category === "all" 
                             ? products.length 
                             : products.filter(p => p.category === category).length}
@@ -180,7 +180,7 @@ function ProductsContent() {
                     setSelectedCategory("all");
                     setSearchQuery("");
                   }}
-                  className="w-full mt-6 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:text-gray-300"
+                  className="w-full mt-6 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Clear all filters
                 </button>
@@ -191,23 +191,25 @@ function ProductsContent() {
           {/* Main product grid */}
           <div className="flex-1">
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm h-80 animate-pulse"
-                  />
-                ))}
+              <div className="px-4 py-6 md:px-0 md:py-0">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-6">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-xl shadow-sm h-80 animate-pulse"
+                    />
+                  ))}
+                </div>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12 md:py-16">
-                <div className="mx-auto w-20 h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4 md:mb-6">
+                <div className="mx-auto w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4 md:mb-6">
                   <Search className="h-10 w-10 md:h-12 md:w-12 text-gray-400" />
                 </div>
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
                   No products found
                 </h3>
-                <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                <p className="text-sm md:text-base text-gray-600 mb-6 max-w-md mx-auto">
                   {searchQuery
                     ? `No products match "${searchQuery}". Try a different search term.`
                     : selectedCategory !== "all"
@@ -224,7 +226,7 @@ function ProductsContent() {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="px-5 py-2 text-sm md:text-base border border-gray-300 rounded-lg hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                      className="px-5 py-2 text-sm md:text-base border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
                       Clear Search
                     </button>
@@ -232,10 +234,12 @@ function ProductsContent() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-4 lg:gap-6">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+              <div className="px-4 py-6 md:px-0 md:py-0">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
               </div>
             )}
 
@@ -243,19 +247,19 @@ function ProductsContent() {
             {filteredProducts.length > 0 && (
               <div className="mt-12 flex justify-center">
                 <nav className="flex items-center gap-2">
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-zinc-800">
+                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
                     Previous
                   </button>
                   <button className="px-4 py-2 rounded-lg bg-black text-white">
                     1
                   </button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-zinc-800">
+                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
                     2
                   </button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-zinc-800">
+                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
                     3
                   </button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-zinc-800">
+                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
                     Next
                   </button>
                 </nav>
@@ -272,10 +276,10 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading products...</p>
+          <p className="text-gray-600">Loading products...</p>
         </div>
       </div>
     }>
