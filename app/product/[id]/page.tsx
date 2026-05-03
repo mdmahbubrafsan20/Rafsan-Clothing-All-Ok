@@ -199,17 +199,17 @@ export default function ProductPage({ params }: PageProps) {
 
             {/* Price */}
             <div className="flex items-center gap-4">
-              <span className="text-4xl font-bold text-gray-900">
-                à§³{product.price.toFixed(2)}
+              <span className="text-[17px] font-semibold text-gray-900">
+                ৳{product.price.toFixed(2)}
               </span>
               {product.original_price && (
                 <span className="text-xl text-gray-500 line-through">
-                  à§³{product.original_price.toFixed(2)}
+                  ৳{product.original_price.toFixed(2)}
                 </span>
               )}
               {product.original_price && (
                 <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
-                  Save à§³{(product.original_price - product.price).toFixed(2)}
+                  Save ৳{(product.original_price - product.price).toFixed(2)}
                 </span>
               )}
             </div>
