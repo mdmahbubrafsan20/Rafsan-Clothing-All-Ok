@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -19,8 +19,7 @@ import {
   Bell,
   Sun,
   Moon,
-  ChevronLeft,
-  ChevronRight,
+  Menu,
   LogOut,
 } from "lucide-react";
 
@@ -44,15 +43,24 @@ const adminNavItems = [
 export default function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.innerWidth < 1024) setSidebarCollapsed(true);
-  }, []);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setIsDesktop(mql.matches);
+    onChange();
+    mql.addEventListener?.("change", onChange);
+    return () => mql.removeEventListener?.("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (isDesktop) setDrawerOpen(false);
+  }, [isDesktop]);
 
   useEffect(() => {
     async function checkAuth() {
@@ -91,6 +99,11 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
     router.refresh();
   };
 
+  const currentTitle = useMemo(() => {
+    const current = adminNavItems.find((i) => i.href === pathname)?.label;
+    return current || "Admin Panel";
+  }, [pathname]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -104,31 +117,27 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
 
   return (
     <div className={`min-h-screen ${darkMode ? "dark bg-gray-900" : "bg-gray-50"}`}>
-      {/* Top Bar */}
-      <header className="fixed top-0 right-0 left-0 lg:left-64 z-50 bg-white border-b border-gray-200 transition-all duration-300 ease-in-out lg:ml-0">
-        <div className="px-6 py-4 flex items-center justify-between">
-          {/* Left side - Brand */}
-          <div className="flex items-center space-x-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+        <div className="h-16 px-4 sm:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
             <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-lg hover:bg-gray-100 lg:hidden"
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Open menu"
             >
-              {sidebarCollapsed ? (
-                <ChevronRight className="h-5 w-5 text-gray-600" />
-              ) : (
-                <ChevronLeft className="h-5 w-5 text-gray-600" />
-              )}
+              <Menu className="h-5 w-5 text-gray-700" />
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">RafSan Clothing</h1>
-              <p className="text-sm text-gray-500">Production control panel</p>
+            <div className="min-w-0">
+              <p className="text-xs text-gray-500 hidden sm:block">RafSan Clothing</p>
+              <h1 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                {currentTitle}
+              </h1>
             </div>
           </div>
 
-          {/* Right side - Search, Icons, Profile */}
-          <div className="flex items-center space-x-4">
-            {/* Search bar */}
-            <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-4 py-2 w-64">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-56">
               <Search className="h-4 w-4 text-gray-400 mr-2" />
               <input
                 type="text"
@@ -136,11 +145,11 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
                 className="bg-transparent border-none outline-none text-sm w-full"
               />
             </div>
-
-            {/* Theme toggle */}
             <button
+              type="button"
               onClick={() => setDarkMode(!darkMode)}
               className="p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Toggle theme"
             >
               {darkMode ? (
                 <Sun className="h-5 w-5 text-gray-600" />
@@ -148,123 +157,120 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
                 <Moon className="h-5 w-5 text-gray-600" />
               )}
             </button>
-
-            {/* Notifications */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 relative">
+            <button
+              type="button"
+              className="p-2 rounded-lg hover:bg-gray-100 relative"
+              aria-label="Notifications"
+            >
               <Bell className="h-5 w-5 text-gray-600" />
               <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
             </button>
-
-            {/* Admin profile */}
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                {user?.email?.charAt(0).toUpperCase() || "A"}
-              </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">Admin</p>
-                <p className="text-xs text-gray-500 truncate max-w-[150px]">{user?.email}</p>
-              </div>
+            <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+              {user?.email?.charAt(0).toUpperCase() || "A"}
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex pt-16">
-        {/* Sidebar */}
-        <aside
-          className={`
-            ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"}
-            ${sidebarCollapsed ? "-translate-x-full lg:translate-x-0" : "translate-x-0"}
-            fixed lg:static inset-y-0 left-0 z-40
-            w-64 bg-gray-50 border-r border-gray-200
-            transition-all duration-300 ease-in-out
-            lg:block
-          `}
-        >
-          <div className="h-full flex flex-col">
-            {/* Sidebar header */}
-            <div className="p-6 border-b border-gray-200 hidden lg:block">
-              <div className="flex items-center justify-between">
-                {!sidebarCollapsed && (
-                  <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
-                )}
-                <button
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className="p-2 rounded-lg hover:bg-gray-200 hidden lg:block"
-                >
-                  {sidebarCollapsed ? (
-                    <ChevronRight className="h-5 w-5 text-gray-600" />
-                  ) : (
-                    <ChevronLeft className="h-5 w-5 text-gray-600" />
-                  )}
-                </button>
+      {/* Mobile drawer */}
+      {drawerOpen && (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            aria-label="Close menu"
+            onClick={() => setDrawerOpen(false)}
+          />
+          <aside className="fixed top-0 left-0 z-50 h-full w-[84vw] max-w-[320px] bg-white border-r border-gray-200 lg:hidden">
+            <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Admin Panel</p>
+                <p className="text-xs text-gray-500 truncate max-w-[240px]">{user?.email}</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100"
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
             </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 p-4 overflow-y-auto">
+            <nav className="p-3 overflow-y-auto h-[calc(100%-64px-72px)]">
               <ul className="space-y-1">
                 {adminNavItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
                   return (
-                    <li key={item.label}>
+                    <li key={item.href}>
                       <Link
                         href={item.href}
-                        className={`
-                          flex items-center ${sidebarCollapsed ? "justify-center" : "space-x-3"} px-3 py-3
-                          rounded-lg transition-colors
-                          ${isActive
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-700 hover:bg-gray-200"
-                          }
-                        `}
+                        onClick={() => setDrawerOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+                          isActive ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100"
+                        }`}
                       >
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        {!sidebarCollapsed && (
-                          <span className="font-medium">{item.label}</span>
-                        )}
+                        <Icon className="h-5 w-5 shrink-0" />
+                        <span className="font-medium text-sm">{item.label}</span>
                       </Link>
                     </li>
                   );
                 })}
               </ul>
             </nav>
-
-            {/* Logout button */}
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-3 border-t border-gray-200">
               <button
+                type="button"
                 onClick={handleLogout}
-                className={`
-                  flex items-center ${sidebarCollapsed ? "justify-center" : "justify-center space-x-3"} 
-                  w-full px-3 py-3 rounded-lg
-                  text-red-600 hover:bg-red-50 transition-colors
-                `}
+                className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="h-5 w-5" />
-                {!sidebarCollapsed && (
-                  <span className="font-medium">Logout</span>
-                )}
+                <span className="font-medium text-sm">Logout</span>
               </button>
             </div>
+          </aside>
+        </>
+      )}
+
+      <div className="pt-16 lg:flex">
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:block lg:w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-64px)] sticky top-16">
+          <div className="p-4">
+            <p className="text-xs text-gray-500 mb-2 truncate">{user?.email}</p>
+            <nav>
+              <ul className="space-y-1">
+                {adminNavItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+                          isActive ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5 shrink-0" />
+                        <span className="font-medium text-sm">{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mt-4 w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium text-sm">Logout</span>
+            </button>
           </div>
         </aside>
 
-        {/* Main content */}
-        <main
-          className={`
-          flex-1 min-w-0 relative
-          ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}
-          transition-all duration-300 ease-in-out
-        `}
-        >
-          {!sidebarCollapsed && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-              onClick={() => setSidebarCollapsed(true)}
-            />
-          )}
-          <div className="relative z-0 p-4 sm:p-6 lg:p-8 max-w-full overflow-x-auto">
+        <main className="flex-1 min-w-0">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-full">
             {children}
           </div>
         </main>

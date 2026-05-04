@@ -1,9 +1,11 @@
 "use client";
 
 import AdminDashboardLayout from "@/components/AdminDashboardLayout";
+import ImageUploader from "@/components/ImageUploader";
 import { Image, Plus, Search, Edit, Trash2, Eye, EyeOff, ChevronLeft, ChevronRight, Loader2, Calendar, Link as LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Banner, getAllBanners, createBanner, updateBanner, deleteBanner, getBannerStats } from "@/lib/banners";
+import { uploadBannerImages } from "@/lib/upload";
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -14,6 +16,9 @@ export default function AdminBannersPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -21,6 +26,7 @@ export default function AdminBannersPage() {
     link_url: "",
     is_active: true,
     position: 0,
+    placement: "homepage_slider" as Banner["placement"],
     start_date: "",
     end_date: "",
   });
@@ -79,34 +85,62 @@ export default function AdminBannersPage() {
   };
 
   const handleAddBanner = async () => {
-    if (!formData.title || !formData.image_url) {
-      alert("Please fill in required fields (title and image URL)");
+    if (!formData.title) {
+      alert("Please fill in required fields (title)");
       return;
     }
 
-    const newBanner = await createBanner(formData);
-    if (newBanner) {
-      setBanners([newBanner, ...banners]);
-      setShowAddModal(false);
-      resetForm();
-      // Refresh stats
-      const newStats = await getBannerStats();
-      setStats(newStats);
+    setUploading(true);
+    try {
+      if (selectedFiles.length === 0) {
+        alert("Please upload a banner image.");
+        return;
+      }
+      const urls = await uploadBannerImages(selectedFiles);
+      if (urls.length === 0) {
+        alert("Failed to upload banner image. Please try again.");
+        return;
+      }
+
+      const newBanner = await createBanner({ ...formData, image_url: urls[0] });
+      if (newBanner) {
+        setBanners([newBanner, ...banners]);
+        setShowAddModal(false);
+        resetForm();
+        const newStats = await getBannerStats();
+        setStats(newStats);
+      }
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleEditBanner = async () => {
-    if (!editingBanner || !formData.title || !formData.image_url) return;
+    if (!editingBanner || !formData.title) return;
 
-    const updatedBanner = await updateBanner(editingBanner.id, formData);
-    if (updatedBanner) {
-      setBanners(banners.map(b => b.id === editingBanner.id ? updatedBanner : b));
-      setShowEditModal(false);
-      setEditingBanner(null);
-      resetForm();
-      // Refresh stats
-      const newStats = await getBannerStats();
-      setStats(newStats);
+    setUploading(true);
+    try {
+      let imageUrl = formData.image_url;
+      if (selectedFiles.length > 0) {
+        const urls = await uploadBannerImages(selectedFiles);
+        if (urls.length > 0) imageUrl = urls[0];
+      }
+
+      const updatedBanner = await updateBanner(editingBanner.id, {
+        ...formData,
+        image_url: imageUrl,
+      });
+
+      if (updatedBanner) {
+        setBanners(banners.map(b => b.id === editingBanner.id ? updatedBanner : b));
+        setShowEditModal(false);
+        setEditingBanner(null);
+        resetForm();
+        const newStats = await getBannerStats();
+        setStats(newStats);
+      }
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -118,9 +152,13 @@ export default function AdminBannersPage() {
       link_url: "",
       is_active: true,
       position: 0,
+      placement: "homepage_slider",
       start_date: "",
       end_date: "",
     });
+    setSelectedFiles([]);
+    setExistingImages([]);
+    setUploading(false);
   };
 
   const openEditModal = (banner: Banner) => {
@@ -132,10 +170,18 @@ export default function AdminBannersPage() {
       link_url: banner.link_url || "",
       is_active: banner.is_active,
       position: banner.position,
+      placement: banner.placement || "homepage_slider",
       start_date: banner.start_date || "",
       end_date: banner.end_date || "",
     });
+    setExistingImages(banner.image_url ? [banner.image_url] : []);
+    setSelectedFiles([]);
     setShowEditModal(true);
+  };
+
+  const handleFilesChange = (files: File[]) => setSelectedFiles(files);
+  const handleRemoveExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const formatDate = (dateString?: string) => {
@@ -158,7 +204,7 @@ export default function AdminBannersPage() {
 
   return (
     <AdminDashboardLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -377,15 +423,37 @@ export default function AdminBannersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Image URL *
+                    Banner Image *
                   </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                    placeholder="https://example.com/banner.jpg"
-                  />
+                  <ImageUploader onFilesChange={handleFilesChange} existingImages={[]} maxFiles={1} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Placement
+                    </label>
+                    <select
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+                      value={formData.placement || "homepage_slider"}
+                      onChange={(e) => setFormData({ ...formData, placement: e.target.value as Banner["placement"] })}
+                    >
+                      <option value="homepage_slider">Homepage Slider</option>
+                      <option value="homepage_top">Homepage Top</option>
+                      <option value="category_page">Category Page</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Position
+                    </label>
+                    <input
+                      type="number"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      value={formData.position}
+                      onChange={(e) => setFormData({...formData, position: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -399,31 +467,18 @@ export default function AdminBannersPage() {
                     placeholder="https://example.com/sale"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Position
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                      value={formData.position}
-                      onChange={(e) => setFormData({...formData, position: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status
-                    </label>
-                    <select
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                      value={formData.is_active ? "active" : "inactive"}
-                      onChange={(e) => setFormData({...formData, is_active: e.target.value === "active"})}
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                    value={formData.is_active ? "active" : "inactive"}
+                    onChange={(e) => setFormData({...formData, is_active: e.target.value === "active"})}
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -459,9 +514,10 @@ export default function AdminBannersPage() {
                 </button>
                 <button
                   onClick={handleAddBanner}
-                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+                  disabled={uploading}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Add Banner
+                  {uploading ? "Uploading..." : "Add Banner"}
                 </button>
               </div>
             </div>
@@ -498,14 +554,42 @@ export default function AdminBannersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Image URL *
+                    Banner Image *
                   </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                  <ImageUploader
+                    onFilesChange={handleFilesChange}
+                    existingImages={existingImages}
+                    onRemoveExistingImage={handleRemoveExistingImage}
+                    maxFiles={1}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Placement
+                    </label>
+                    <select
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+                      value={formData.placement || "homepage_slider"}
+                      onChange={(e) => setFormData({ ...formData, placement: e.target.value as Banner["placement"] })}
+                    >
+                      <option value="homepage_slider">Homepage Slider</option>
+                      <option value="homepage_top">Homepage Top</option>
+                      <option value="category_page">Category Page</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Position
+                    </label>
+                    <input
+                      type="number"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      value={formData.position}
+                      onChange={(e) => setFormData({...formData, position: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -518,31 +602,18 @@ export default function AdminBannersPage() {
                     onChange={(e) => setFormData({...formData, link_url: e.target.value})}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Position
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                      value={formData.position}
-                      onChange={(e) => setFormData({...formData, position: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status
-                    </label>
-                    <select
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                      value={formData.is_active ? "active" : "inactive"}
-                      onChange={(e) => setFormData({...formData, is_active: e.target.value === "active"})}
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                    value={formData.is_active ? "active" : "inactive"}
+                    onChange={(e) => setFormData({...formData, is_active: e.target.value === "active"})}
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -581,9 +652,10 @@ export default function AdminBannersPage() {
                 </button>
                 <button
                   onClick={handleEditBanner}
-                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+                  disabled={uploading}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Update Banner
+                  {uploading ? "Saving..." : "Update Banner"}
                 </button>
               </div>
             </div>

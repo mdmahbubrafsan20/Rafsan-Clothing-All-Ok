@@ -24,7 +24,6 @@ export default function AdminProductsPage() {
     description: "",
     price: 0,
     original_price: 0,
-    image_url: "",
     category_id: "",
     stock: 0,
     sku: "",
@@ -88,6 +87,10 @@ export default function AdminProductsPage() {
       alert("Please fill in required fields (name and price)");
       return;
     }
+    if (selectedFiles.length === 0) {
+      alert("Please upload at least 1 product image.");
+      return;
+    }
 
     setUploading(true);
     try {
@@ -107,7 +110,7 @@ export default function AdminProductsPage() {
         ...formData,
         images: imageUrls,
         // Keep image_url for backward compatibility (use first image if available)
-        image_url: imageUrls.length > 0 ? imageUrls[0] : formData.image_url,
+        image_url: imageUrls[0],
       };
 
       const newProduct = await createProduct(productData);
@@ -150,7 +153,7 @@ export default function AdminProductsPage() {
         ...formData,
         images: allImages,
         // Keep image_url for backward compatibility (use first image if available)
-        image_url: allImages.length > 0 ? allImages[0] : formData.image_url,
+        image_url: allImages.length > 0 ? allImages[0] : undefined,
       };
 
       const updatedProduct = await updateProduct(editingProduct.id, updateData);
@@ -177,7 +180,6 @@ export default function AdminProductsPage() {
       description: "",
       price: 0,
       original_price: 0,
-      image_url: "",
       category_id: "",
       stock: 0,
       sku: "",
@@ -204,7 +206,6 @@ export default function AdminProductsPage() {
       description: product.description || "",
       price: product.price,
       original_price: product.original_price || 0,
-      image_url: product.image_url || "",
       category_id: product.category_id || "",
       stock: product.stock || 0,
       sku: product.sku || "",
@@ -250,7 +251,7 @@ export default function AdminProductsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Product Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900 break-words">Product Management</h1>
               <p className="text-gray-600 mt-2">
                 Manage your product catalog, inventory, and pricing
               </p>

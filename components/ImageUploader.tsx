@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, ChangeEvent } from "react";
+import { useState, useCallback, useRef, ChangeEvent, useEffect } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { validateImageFile } from "@/lib/upload";
 
@@ -121,9 +121,9 @@ export default function ImageUploader({
   }, [previewUrls]);
 
   // Cleanup on unmount
-  useState(() => {
+  useEffect(() => {
     return () => cleanup();
-  });
+  }, [cleanup]);
 
   const allImages = [
     ...existingImages.map((url, index) => ({ type: 'existing' as const, url, index })),

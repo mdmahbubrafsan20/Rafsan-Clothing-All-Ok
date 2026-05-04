@@ -46,6 +46,40 @@ export async function uploadProductImages(files: File[]): Promise<string[]> {
 }
 
 /**
+ * Upload banner images to Supabase Storage bucket "products" under `banners/`.
+ * Reuses the existing bucket to avoid extra setup.
+ */
+export async function uploadBannerImages(files: File[]): Promise<string[]> {
+  if (!files.length) return [];
+  const uploadedUrls: string[] = [];
+
+  for (const file of files) {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `banners/${fileName}`;
+
+      const { error } = await supabase.storage.from("products").upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+      if (error) {
+        console.error("Error uploading banner file:", error);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage.from("products").getPublicUrl(filePath);
+      uploadedUrls.push(publicUrl);
+    } catch (error) {
+      console.error(`Failed to upload banner ${file.name}:`, error);
+    }
+  }
+
+  return uploadedUrls;
+}
+
+/**
  * Delete files from Supabase Storage
  * @param urls Array of public URLs to delete
  */

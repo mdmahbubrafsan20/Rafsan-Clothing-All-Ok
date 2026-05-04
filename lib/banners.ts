@@ -8,6 +8,8 @@ export type Banner = {
   link_url?: string;
   is_active: boolean;
   position: number;
+  /** Controls where this banner should render on the storefront. */
+  placement?: 'homepage_slider' | 'homepage_top' | 'category_page' | 'other';
   start_date?: string;
   end_date?: string;
   created_at?: string;
@@ -90,6 +92,7 @@ export async function createBanner(banner: Omit<Banner, 'id' | 'created_at' | 'u
         link_url: banner.link_url,
         is_active: banner.is_active ?? true,
         position: banner.position || 0,
+        placement: banner.placement || 'homepage_slider',
         start_date: banner.start_date,
         end_date: banner.end_date,
       }])
@@ -120,6 +123,7 @@ export async function updateBanner(id: string, updates: Partial<Banner>): Promis
         link_url: updates.link_url,
         is_active: updates.is_active,
         position: updates.position,
+        placement: updates.placement,
         start_date: updates.start_date,
         end_date: updates.end_date,
         updated_at: new Date().toISOString(),

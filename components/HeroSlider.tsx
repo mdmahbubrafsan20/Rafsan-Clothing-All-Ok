@@ -1,24 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { getActiveBanners, type Banner } from "@/lib/banners";
 
-const slides = [
+const fallbackSlides = [
   {
-    id: 1,
+    id: "fallback-1",
     image: "/fashion-placeholder.svg",
     alt: "Fashion collection 1",
     title: "Premium Fashion",
     description: "Discover our latest collection",
   },
   {
-    id: 2,
+    id: "fallback-2",
     image: "/fashion-placeholder.svg",
     alt: "Fashion collection 2",
     title: "Modern Style",
     description: "Elevate your wardrobe",
   },
   {
-    id: 3,
+    id: "fallback-3",
     image: "/fashion-placeholder.svg",
     alt: "Fashion collection 3",
     title: "Quality Materials",
@@ -28,13 +29,39 @@ const slides = [
 
 export default function HeroSlider() {
   const [index, setIndex] = useState(0);
+  const [banners, setBanners] = useState<Banner[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const data = await getActiveBanners();
+      // Only show slider banners by default (fallback if column missing)
+      const slider = data.filter((b) => (b.placement || "homepage_slider") === "homepage_slider");
+      if (!cancelled) setBanners(slider);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const slides = useMemo(() => {
+    if (banners.length === 0) return fallbackSlides;
+    return banners.map((b) => ({
+      id: b.id,
+      image: b.image_url,
+      alt: b.title,
+      title: b.title,
+      description: b.description || "",
+      link: b.link_url,
+    }));
+  }, [banners]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % slides.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   const goToSlide = (i: number) => {
     setIndex(i);
