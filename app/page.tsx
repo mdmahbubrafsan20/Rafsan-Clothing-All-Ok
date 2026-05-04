@@ -2,13 +2,13 @@ import HeroSlider from "@/components/HeroSlider";
 import CategorySection from "@/components/CategorySection";
 import BottomNav from "@/components/BottomNav";
 import ProductCard from "@/components/ProductCard";
-import { fetchActiveProductsForHome } from "@/lib/products";
+import { fetchProducts } from "@/lib/products";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 
-const HOME_PRODUCT_LIMIT = 150;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const products = await fetchActiveProductsForHome(HOME_PRODUCT_LIMIT);
+  const products = await fetchProducts({ activeOnly: true });
 
   return (
     <>
