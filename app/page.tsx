@@ -2,22 +2,19 @@ import HeroSlider from "@/components/HeroSlider";
 import CategorySection from "@/components/CategorySection";
 import BottomNav from "@/components/BottomNav";
 import ProductCard from "@/components/ProductCard";
-import { fetchActiveProductsForHome, getAllCategories } from "@/lib/products";
+import { fetchActiveProductsForHome } from "@/lib/products";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 
 const HOME_PRODUCT_LIMIT = 150;
 
 export default async function Home() {
-  const [products, categories] = await Promise.all([
-    fetchActiveProductsForHome(HOME_PRODUCT_LIMIT),
-    getAllCategories(),
-  ]);
+  const products = await fetchActiveProductsForHome(HOME_PRODUCT_LIMIT);
 
   return (
     <>
       <HeroSlider />
       <div className="mb-1 md:mb-3">
-        <CategorySection categories={categories} />
+        <CategorySection />
       </div>
       <div className="pt-1 pb-20 md:pb-6">
         {products.length === 0 ? (

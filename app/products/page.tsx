@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense, useMemo, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { fetchProducts, getAllCategories } from "@/lib/products";
 import { Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -9,16 +9,16 @@ import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 import { Search, Filter } from "lucide-react";
 import { normalizeCategoryName } from "@/lib/category-nav";
 
-function categoryMatch(productCategory: string | undefined, selected: string) {
-  if (selected === "all") return true;
+function categoryMatch(productCategory: string | undefined, filterKey: string) {
+  if (filterKey === "all") return true;
   return (
     !!productCategory &&
-    normalizeCategoryName(productCategory) === normalizeCategoryName(selected)
+    normalizeCategoryName(productCategory) === normalizeCategoryName(filterKey)
   );
 }
 
-// Create a separate component that uses useSearchParams
 function ProductsContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || "";
   const categoryParam = searchParams.get("category") || "";
@@ -27,10 +27,36 @@ function ProductsContent() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(["all"]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>(search);
 
-  // Load products on mount
+  /** Category filter always follows `?category=` when present (matches DB name case-insensitively). */
+  const effectiveCategory = useMemo(() => {
+    const q = categoryParam.trim();
+    return q.length > 0 ? q : "all";
+  }, [categoryParam]);
+
+  const applyCategory = useCallback(
+    (category: string) => {
+      const p = new URLSearchParams(searchParams.toString());
+      if (category === "all") {
+        p.delete("category");
+      } else {
+        p.set("category", category);
+      }
+      const qs = p.toString();
+      router.replace(qs ? `/products?${qs}` : "/products", { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const categoryFilterActive = useCallback(
+    (category: string) => {
+      if (category === "all") return effectiveCategory === "all";
+      return normalizeCategoryName(category) === normalizeCategoryName(effectiveCategory);
+    },
+    [effectiveCategory]
+  );
+
   useEffect(() => {
     async function loadProducts() {
       setLoading(true);
@@ -42,13 +68,11 @@ function ProductsContent() {
     loadProducts();
   }, []);
 
-  // Load categories on mount
   useEffect(() => {
     async function loadCategories() {
       try {
         const data = await getAllCategories();
-        // Extract category names for the filter buttons
-        const categoryNames = data.map(category => category.name);
+        const categoryNames = data.map((category) => category.name);
         setCategories(["all", ...categoryNames]);
       } catch (error) {
         console.error("Failed to load categories:", error);
@@ -57,39 +81,32 @@ function ProductsContent() {
     loadCategories();
   }, []);
 
-  // Update searchQuery when URL param changes
   useEffect(() => {
     setSearchQuery(search);
   }, [search]);
 
-  // Deep-link: /products?category=Men (case-insensitive vs DB category names)
-  useEffect(() => {
-    if (categories.length <= 1) return;
-    const raw = categoryParam.trim();
-    if (!raw) return;
-    const match = categories.find(
-      (c) => c !== "all" && normalizeCategoryName(c) === normalizeCategoryName(raw)
-    );
-    if (match) setSelectedCategory(match);
-  }, [categories, categoryParam]);
-
-  // Filter products when category or search changes
   useEffect(() => {
     const filtered = products.filter((p) => {
-      const matchCategory = categoryMatch(p.category, selectedCategory);
-
-      const matchSearch =
-        p.name.toLowerCase().includes(searchQuery.toLowerCase());
-
+      const matchCategory = categoryMatch(p.category, effectiveCategory);
+      const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCategory && matchSearch;
     });
     setFilteredProducts(filtered);
-  }, [selectedCategory, searchQuery, products]);
+  }, [effectiveCategory, searchQuery, products]);
+
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    router.replace("/products", { scroll: false });
+  };
+
+  const displayCategoryLabel =
+    effectiveCategory === "all"
+      ? ""
+      : effectiveCategory.charAt(0).toUpperCase() + effectiveCategory.slice(1);
 
   return (
     <div className="min-h-screen bg-white max-md:bg-white">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-        {/* Page header with search */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
@@ -100,8 +117,7 @@ function ProductsContent() {
                 Discover our latest collection of premium clothing
               </p>
             </div>
-            
-            {/* Search input */}
+
             <div className="relative w-full md:w-64">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -116,7 +132,6 @@ function ProductsContent() {
             </div>
           </div>
 
-          {/* Mobile filter buttons */}
           <div className="lg:hidden mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Filter className="h-5 w-5 text-gray-500" />
@@ -126,9 +141,10 @@ function ProductsContent() {
               {categories.map((category) => (
                 <button
                   key={category}
-                  onClick={() => setSelectedCategory(category)}
+                  type="button"
+                  onClick={() => applyCategory(category)}
                   className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors ${
-                    selectedCategory === category
+                    categoryFilterActive(category)
                       ? "bg-black text-white"
                       : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
@@ -139,19 +155,17 @@ function ProductsContent() {
             </div>
           </div>
 
-          {/* Results count */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{filteredProducts.length}</span> product{filteredProducts.length !== 1 ? "s" : ""}
-              {selectedCategory !== "all" && ` in ${selectedCategory}`}
+              Showing <span className="font-semibold">{filteredProducts.length}</span> product
+              {filteredProducts.length !== 1 ? "s" : ""}
+              {effectiveCategory !== "all" && ` in ${displayCategoryLabel}`}
               {searchQuery && ` matching "${searchQuery}"`}
             </p>
-            {(searchQuery || selectedCategory !== "all") && (
+            {(searchQuery || effectiveCategory !== "all") && (
               <button
-                onClick={() => {
-                  setSelectedCategory("all");
-                  setSearchQuery("");
-                }}
+                type="button"
+                onClick={clearAllFilters}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Clear all filters
@@ -160,9 +174,7 @@ function ProductsContent() {
           </div>
         </div>
 
-        {/* Main 2-column layout */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar - hidden on mobile, visible on desktop */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-24">
               <h2 className="text-lg font-bold text-gray-900 mb-4">
@@ -172,12 +184,13 @@ function ProductsContent() {
                 {categories.map((category) => (
                   <li key={category}>
                     <button
+                      type="button"
                       className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                        selectedCategory === category
+                        categoryFilterActive(category)
                           ? "bg-black text-white"
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => applyCategory(category)}
                     >
                       <div className="flex justify-between items-center">
                         <span className="font-medium">
@@ -194,13 +207,10 @@ function ProductsContent() {
                 ))}
               </ul>
 
-              {/* Clear filters button */}
-              {(selectedCategory !== "all" || searchQuery) && (
+              {(effectiveCategory !== "all" || searchQuery) && (
                 <button
-                  onClick={() => {
-                    setSelectedCategory("all");
-                    setSearchQuery("");
-                  }}
+                  type="button"
+                  onClick={clearAllFilters}
                   className="w-full mt-6 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Clear all filters
@@ -209,7 +219,6 @@ function ProductsContent() {
             </div>
           </aside>
 
-          {/* Main product grid */}
           <div className="flex-1">
             {loading ? (
               <div className="px-4 py-6 md:px-0 md:py-0">
@@ -233,19 +242,21 @@ function ProductsContent() {
                 <p className="text-sm md:text-base text-gray-600 mb-6 max-w-md mx-auto">
                   {searchQuery
                     ? `No products match "${searchQuery}". Try a different search term.`
-                    : selectedCategory !== "all"
-                    ? `No products found in ${selectedCategory} category.`
+                    : effectiveCategory !== "all"
+                    ? `No products found in ${displayCategoryLabel} category.`
                     : "No products available at the moment."}
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <button
-                    onClick={() => setSelectedCategory("all")}
+                    type="button"
+                    onClick={() => applyCategory("all")}
                     className="px-5 py-2 text-sm md:text-base bg-black text-white rounded-lg hover:bg-gray-800"
                   >
                     Show All Products
                   </button>
                   {searchQuery && (
                     <button
+                      type="button"
                       onClick={() => setSearchQuery("")}
                       className="px-5 py-2 text-sm md:text-base border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
@@ -263,7 +274,6 @@ function ProductsContent() {
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </div>
@@ -271,17 +281,18 @@ function ProductsContent() {
   );
 }
 
-// Main component with Suspense boundary
 export default function ProductsPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading products...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ProductsContent />
     </Suspense>
   );
