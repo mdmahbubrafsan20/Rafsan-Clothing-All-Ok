@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { fetchProducts, getAllCategories } from "@/lib/products";
 import { Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 import { Search, Filter } from "lucide-react";
 
 // Create a separate component that uses useSearchParams
@@ -23,7 +24,7 @@ function ProductsContent() {
   useEffect(() => {
     async function loadProducts() {
       setLoading(true);
-      const data = await fetchProducts();
+      const data = await fetchProducts({ activeOnly: true });
       setProducts(data);
       setFilteredProducts(data);
       setLoading(false);
@@ -192,7 +193,7 @@ function ProductsContent() {
           <div className="flex-1">
             {loading ? (
               <div className="px-4 py-6 md:px-0 md:py-0">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-6">
+                <div className={STORE_PRODUCT_GRID_CLASS}>
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div
                       key={i}
@@ -235,7 +236,7 @@ function ProductsContent() {
               </div>
             ) : (
               <div className="px-4 py-6 md:px-0 md:py-0">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-6">
+                <div className={STORE_PRODUCT_GRID_CLASS}>
                   {filteredProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -243,28 +244,6 @@ function ProductsContent() {
               </div>
             )}
 
-            {/* Pagination placeholder */}
-            {filteredProducts.length > 0 && (
-              <div className="mt-12 flex justify-center">
-                <nav className="flex items-center gap-2">
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
-                    Previous
-                  </button>
-                  <button className="px-4 py-2 rounded-lg bg-black text-white">
-                    1
-                  </button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
-                    2
-                  </button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
-                    3
-                  </button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
-                    Next
-                  </button>
-                </nav>
-              </div>
-            )}
           </div>
         </div>
       </div>

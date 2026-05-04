@@ -1,15 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, Plus, Minus, ArrowLeft } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import { deliveryFee } from "@/lib/shipping";
 
 export default function CartPage() {
   const router = useRouter();
   const { cart, updateQuantity, removeFromCart, cartTotal, clearCart } = useCart();
+  const [deliveryZone, setDeliveryZone] = useState<"inside" | "outside">("inside");
 
   const handleIncreaseQuantity = (id: string) => {
     const item = cart.find(item => item.id === id);
@@ -30,7 +33,7 @@ export default function CartPage() {
   };
 
   const subtotal = cartTotal;
-  const shipping = cart.length > 0 ? 99 : 0;
+  const shipping = cart.length > 0 ? deliveryFee(deliveryZone) : 0;
   const total = subtotal + shipping;
 
   if (cart.length === 0) {
@@ -223,14 +226,43 @@ export default function CartPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
 
               <div className="space-y-4">
+                {cart.length > 0 && (
+                  <div className="rounded-lg border border-gray-200 p-3 mb-2">
+                    <p className="text-xs font-medium text-gray-700 mb-2">Estimate delivery (same as checkout)</p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryZone("inside")}
+                        className={`flex-1 text-xs py-2 rounded-md border ${
+                          deliveryZone === "inside"
+                            ? "border-black bg-black text-white"
+                            : "border-gray-300 text-gray-700"
+                        }`}
+                      >
+                        Inside Dhaka · ৳60
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryZone("outside")}
+                        className={`flex-1 text-xs py-2 rounded-md border ${
+                          deliveryZone === "outside"
+                            ? "border-black bg-black text-white"
+                            : "border-gray-300 text-gray-700"
+                        }`}
+                      >
+                        Outside · ৳120
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium text-gray-900">৳{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-gray-600">Shipping (est.)</span>
                   <span className="font-medium text-gray-900">
-                    {shipping > 0 ? `৳${shipping.toFixed(2)}` : "Free"}
+                    {shipping > 0 ? `৳${shipping.toFixed(2)}` : "—"}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-gray-200 pt-4">

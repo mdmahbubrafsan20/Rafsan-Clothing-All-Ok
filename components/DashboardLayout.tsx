@@ -38,25 +38,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.innerWidth < 1024) setSidebarCollapsed(true);
+  }, []);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function checkAuth() {
-      console.log("DashboardLayout: Checking authentication...");
       const { data: { user: authUser }, error } = await supabase.auth.getUser();
-      
-      console.log("DashboardLayout: USER:", authUser);
-      console.log("DashboardLayout: ERROR:", error);
-      
+
       if (error || !authUser) {
-        // Prevent redirect if already on login page
         if (pathname === "/login") {
-          console.log("DashboardLayout: Already on login page, skipping redirect");
           setLoading(false);
           return;
         }
-        console.log("DashboardLayout: No user found, redirecting to /login");
         router.push("/login");
         return;
       }
@@ -64,7 +62,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       setLoading(false);
     }
     checkAuth();
-  }, []); // Empty dependency array - run only once on mount
+  }, [pathname, router]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -201,20 +199,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </aside>
 
         {/* Main content */}
-        <main className={`
-          flex-1
+        <main
+          className={`
+          flex-1 min-w-0 relative
           ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}
           transition-all duration-300 ease-in-out
-        `}>
-          {/* Overlay for mobile sidebar */}
+        `}
+        >
           {!sidebarCollapsed && (
             <div
               className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
               onClick={() => setSidebarCollapsed(true)}
             />
           )}
-          
-          {children}
+          <div className="relative z-0 p-4 sm:p-6 lg:p-8 max-w-full">{children}</div>
         </main>
       </div>
     </div>

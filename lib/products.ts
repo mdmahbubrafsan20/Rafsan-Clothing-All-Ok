@@ -19,6 +19,8 @@ export type Product = {
   fabric?: string;
   sizes?: string[];
   colors?: Array<{ name: string; value: string }>;
+  /** When false, hide from storefront grids (admin toggle). */
+  show_on_homepage?: boolean;
 };
 
 export type Category = {
@@ -33,29 +35,48 @@ export type Category = {
 // Helper function to get products by category
 export async function getProductsByCategory(category: string): Promise<Product[]> {
   try {
-    const { data, error } = await supabase
+    const exact = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         *,
         categories!inner (*)
-      `)
+      `
+      )
       .eq('categories.name', category)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error(`Error fetching products for category ${category}:`, error);
-      throw error;
+    if (exact.error) {
+      console.error(`Error fetching products for category ${category}:`, exact.error);
+      throw exact.error;
     }
 
-    const products: Product[] = (data || []).map((product: any) => ({
+    let rows = exact.data;
+    if (!rows?.length) {
+      const loose = await supabase
+        .from('products')
+        .select(
+          `
+        *,
+        categories!inner (*)
+      `
+        )
+        .ilike('categories.name', category)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (loose.error) {
+        console.error(`Error fetching products (ilike) for ${category}:`, loose.error);
+        return [];
+      }
+      rows = loose.data;
+    }
+
+    return (rows || []).map((product: any) => ({
       ...product,
       category: product.categories?.name || category,
       category_id: product.categories?.id,
     }));
-
-    console.log(`Products for category ${category}:`, products.length);
-    return products;
   } catch (error) {
     console.error(`Failed to fetch products for category ${category}:`, error);
     return [];
@@ -82,10 +103,23 @@ export async function getAllCategories(): Promise<Category[]> {
   }
 }
 
-// Get all products
-export async function fetchProducts(): Promise<Product[]> {
+function mapProductRows(data: unknown[] | null): Product[] {
+  return (data || []).map((product: any) => ({
+    ...product,
+    category: product.categories?.name,
+    category_id: product.categories?.id,
+  }));
+}
+
+export type FetchProductsOptions = {
+  /** Only products visible on the storefront (requires `is_active` column). */
+  activeOnly?: boolean;
+};
+
+// Get all products (admin: all rows; storefront: pass activeOnly)
+export async function fetchProducts(options?: FetchProductsOptions): Promise<Product[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('products')
       .select(`
         *,
@@ -93,20 +127,56 @@ export async function fetchProducts(): Promise<Product[]> {
       `)
       .order('created_at', { ascending: false });
 
+    if (options?.activeOnly) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data, error } = await query;
+
     if (error) {
       console.error('Error fetching products:', error);
       throw error;
     }
 
-    const products: Product[] = (data || []).map((product: any) => ({
-      ...product,
-      category: product.categories?.name,
-      category_id: product.categories?.id,
-    }));
-
+    let products = mapProductRows(data);
+    if (options?.activeOnly) {
+      products = products.filter(
+        (p) => p.show_on_homepage !== false
+      );
+    }
     return products;
   } catch (error) {
     console.error('Failed to fetch products:', error);
+    return [];
+  }
+}
+
+/** Paginated active catalog products (homepage / load more). */
+export async function fetchActiveProductsRange(
+  offset: number,
+  limit: number
+): Promise<Product[]> {
+  try {
+    const from = Math.max(0, offset);
+    const to = from + Math.max(1, limit) - 1;
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        categories (*)
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('Error fetching paginated products:', error);
+      throw error;
+    }
+
+    return mapProductRows(data).filter((p) => p.show_on_homepage !== false);
+  } catch (error) {
+    console.error('Failed to fetch paginated products:', error);
     return [];
   }
 }
@@ -158,6 +228,7 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         stock: product.stock || 0,
         sku: product.sku,
         is_active: product.is_active ?? true,
+        show_on_homepage: product.show_on_homepage ?? true,
       }])
       .select()
       .single();
@@ -197,6 +268,9 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
       is_active: updates.is_active,
       updated_at: new Date().toISOString(),
     };
+    if (updates.show_on_homepage !== undefined) {
+      updateData.show_on_homepage = updates.show_on_homepage;
+    }
     
     // Only include image_url if provided (for backward compatibility)
     if (updates.image_url !== undefined) {
@@ -227,19 +301,25 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
   }
 }
 
-// Delete product
+// Delete product (hard delete; on FK conflict, deactivate and hide from storefront)
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
-    const { error } = await supabase
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (!error) return true;
+
+    const { error: softError } = await supabase
       .from('products')
-      .delete()
+      .update({
+        is_active: false,
+        show_on_homepage: false,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id);
 
-    if (error) {
-      console.error(`Error deleting product ${id}:`, error);
+    if (softError) {
+      console.error(`Error deleting product ${id}:`, error, softError);
       return false;
     }
-
     return true;
   } catch (error) {
     console.error(`Failed to delete product ${id}:`, error);

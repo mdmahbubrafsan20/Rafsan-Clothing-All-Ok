@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
+import { formatBdt } from "@/lib/format-price";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [imageError, setImageError] = useState(false);
@@ -58,24 +59,24 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white rounded-sm md:rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mb-6 md:mb-0 max-md:border-0 max-md:shadow-none max-md:rounded-none">
+    <div className="group relative bg-white rounded-lg lg:rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mb-0 md:mb-0">
       <Link href={`/product/${product.id}`} className="block">
         {/* DISCOUNT BADGE */}
         {hasDiscount && (
-          <div className="absolute top-1.5 left-1.5 z-20 md:top-3 md:left-3 max-md:hidden">
+          <div className="absolute top-1.5 left-1.5 z-20 md:top-3 md:left-3">
             <span className="inline-flex items-center px-1.5 py-0.5 md:px-3 md:py-1 rounded text-[10px] md:text-xs font-bold bg-red-600 text-white">
               -{discountPercent}%
             </span>
           </div>
         )}
 
-        {/* ADD TO CART BUTTON - appears on hover */}
+        {/* ADD TO CART — hover on desktop, always visible on mobile */}
         <button
           onClick={handleAddToCart}
-          className="absolute top-1.5 right-1.5 z-20 p-1 md:p-1.5 lg:p-2 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black hover:text-white max-md:hidden"
+          className="absolute top-1.5 right-1.5 z-20 p-2 md:p-1.5 lg:p-2 bg-white rounded-full shadow-md md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 hover:bg-black hover:text-white"
           aria-label="Add to cart"
         >
-          <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-5 lg:h-5" />
+          <ShoppingBag className="w-4 h-4 md:w-4 md:h-4 lg:w-5 lg:h-5" />
         </button>
 
         {/* IMAGE CONTAINER */}
@@ -96,18 +97,18 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* PRICE ROW */}
           <div className="flex items-center gap-1 md:gap-1.5">
             <span className="text-sm md:text-lg lg:text-xl font-bold text-gray-900">
-              ৳{product.price.toFixed(2)}
+              ৳{formatBdt(product.price)}
             </span>
 
-            {hasDiscount && product.original_price && (
+            {hasDiscount && product.original_price != null && (
               <span className="text-[10px] md:text-xs lg:text-sm text-gray-500 line-through">
-                ৳{product.original_price.toFixed(2)}
+                ৳{formatBdt(product.original_price)}
               </span>
             )}
             
-            {hasDiscount && product.original_price && (
+            {hasDiscount && product.original_price != null && (
               <span className="ml-auto text-[10px] md:text-xs font-medium text-red-600">
-                Save ৳{(product.original_price - product.price).toFixed(2)}
+                Save ৳{formatBdt(Number(product.original_price) - Number(product.price))}
               </span>
             )}
           </div>
@@ -131,9 +132,9 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-base font-semibold leading-none text-gray-900">৳{product.price.toFixed(2)}</span>
-            {hasDiscount && product.original_price && (
-              <span className="text-[14px] text-gray-400 line-through">৳{product.original_price.toFixed(2)}</span>
+            <span className="text-base font-semibold leading-none text-gray-900">৳{formatBdt(product.price)}</span>
+            {hasDiscount && product.original_price != null && (
+              <span className="text-[14px] text-gray-400 line-through">৳{formatBdt(product.original_price)}</span>
             )}
           </div>
         </div>

@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { deliveryFee } from "@/lib/shipping";
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { cart, clearCart } = useCart();
-  const [deliveryOption, setDeliveryOption] = useState<string>("inside");
+  const [deliveryOption, setDeliveryOption] = useState<"inside" | "outside">("inside");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "sslcommerz">("cod");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -31,6 +34,16 @@ export default function CheckoutPage() {
     }
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const p = searchParams.get("payment");
+    if (p === "fail" || p === "cancel") {
+      alert("Payment was not completed. You can try again or choose cash on delivery.");
+    }
+    if (p === "amount" || p === "invalid") {
+      alert("Payment could not be verified. If you were charged, contact support with your order number.");
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -73,17 +86,19 @@ export default function CheckoutPage() {
     try {
       // Calculate total amount
       const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-      const deliveryCost = deliveryOption === "inside" ? 60 : 120;
+      const deliveryCost = deliveryFee(deliveryOption);
       const totalAmount = subtotal + deliveryCost;
 
       // 1. Insert order (guest checkout - user_id can be null)
-      const orderData: any = {
+      const orderData: Record<string, unknown> = {
         total_amount: totalAmount,
         status: "pending",
         shipping_address: `${formData.address}, ${formData.city}`,
         phone: formData.phone,
         customer_name: formData.name,
         order_number: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        payment_method:
+          paymentMethod === "sslcommerz" ? "sslcommerz_pending" : "cash_on_delivery",
       };
 
       // Add user_id if logged in
@@ -102,24 +117,12 @@ export default function CheckoutPage() {
       }
 
       // 2. Prepare order items - use item.id directly (should be UUID from Supabase)
-      const orderItems = cart.map((item) => {
-        // Validate that item.id looks like a UUID
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
-        
-        if (!isUuid) {
-          console.warn(`Cart item ID "${item.id}" doesn't look like a standard UUID. This may cause insertion errors.`);
-        }
-        
-        return {
-          order_id: order.id,
-          product_id: item.id, // Use item.id directly (should be UUID)
-          quantity: item.quantity,
-          price: item.price,
-        };
-      });
-
-      console.log("ORDER ITEMS:", orderItems);
-      console.log("First order item:", orderItems[0]);
+      const orderItems = cart.map((item) => ({
+        order_id: order.id,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      }));
 
       // 4. Insert order items
       const { error: itemsError } = await supabase
@@ -130,13 +133,40 @@ export default function CheckoutPage() {
         throw new Error(`Failed to create order items: ${itemsError.message}`);
       }
 
-      // 5. Clear local cart
+      if (paymentMethod === "sslcommerz") {
+        const initRes = await fetch("/api/payment/sslcommerz/initiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: order.id }),
+        });
+        const initJson = (await initRes.json()) as { gatewayPageUrl?: string; error?: string };
+        if (!initRes.ok || !initJson.gatewayPageUrl) {
+          throw new Error(
+            initJson.error ||
+              "Online payment is not available. Configure SSLCommerz and SUPABASE_SERVICE_ROLE_KEY, or use cash on delivery."
+          );
+        }
+        clearCart();
+        window.location.href = initJson.gatewayPageUrl;
+        return;
+      }
+
       clearCart();
 
-      // 6. Show success message and redirect
+      fetch("/api/order-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNumber: order.order_number,
+          totalAmount,
+          customerName: formData.name,
+          customerPhone: formData.phone,
+          paymentMethod: "Cash on delivery",
+        }),
+      }).catch(() => {});
+
       alert("Order placed successfully!");
-      
-      // Redirect based on authentication
+
       if (user) {
         router.push("/account/dashboard");
       } else {
@@ -152,7 +182,7 @@ export default function CheckoutPage() {
 
   // Calculate subtotal from cart items
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const deliveryCost = deliveryOption === "inside" ? 60 : 120;
+  const deliveryCost = deliveryFee(deliveryOption);
   const total = subtotal + deliveryCost;
 
   return (
@@ -293,6 +323,54 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
+
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment</h2>
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cod")}
+                    className={`w-full flex items-center justify-between p-4 border rounded-lg text-left transition-colors ${
+                      paymentMethod === "cod" ? "border-blue-500 bg-blue-50" : "border-gray-300"
+                    }`}
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">Cash on delivery</p>
+                      <p className="text-sm text-gray-500">Pay when you receive your order</p>
+                    </div>
+                    <span
+                      className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        paymentMethod === "cod" ? "border-blue-500" : "border-gray-400"
+                      }`}
+                    >
+                      {paymentMethod === "cod" ? (
+                        <span className="h-2.5 w-2.5 rounded-full bg-blue-500 block" />
+                      ) : null}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("sslcommerz")}
+                    className={`w-full flex items-center justify-between p-4 border rounded-lg text-left transition-colors ${
+                      paymentMethod === "sslcommerz" ? "border-blue-500 bg-blue-50" : "border-gray-300"
+                    }`}
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">SSLCommerz (card / mobile banking)</p>
+                      <p className="text-sm text-gray-500">Secure hosted checkout — requires server env keys</p>
+                    </div>
+                    <span
+                      className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        paymentMethod === "sslcommerz" ? "border-blue-500" : "border-gray-400"
+                      }`}
+                    >
+                      {paymentMethod === "sslcommerz" ? (
+                        <span className="h-2.5 w-2.5 rounded-full bg-blue-500 block" />
+                      ) : null}
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Right: Order Summary */}
@@ -366,13 +444,19 @@ export default function CheckoutPage() {
                     </svg>
                     Processing Order...
                   </>
+                ) : paymentMethod === "sslcommerz" ? (
+                  "Pay with SSLCommerz"
                 ) : (
-                  "Place Order"
+                  "Place order"
                 )}
               </button>
 
               <p className="text-center text-sm text-gray-500 mt-4">
-                By placing your order, you agree to our Terms & Conditions
+                By placing your order, you agree to our{" "}
+                <Link href="/terms" className="underline text-gray-700 hover:text-black">
+                  Terms &amp; Conditions
+                </Link>
+                .
               </p>
             </div>
           </div>
@@ -380,5 +464,19 @@ export default function CheckoutPage() {
       </main>
       <BottomNav />
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-zinc-50 flex items-center justify-center text-gray-600">
+          Loading checkout…
+        </div>
+      }
+    >
+      <CheckoutInner />
+    </Suspense>
   );
 }

@@ -45,25 +45,24 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.innerWidth < 1024) setSidebarCollapsed(true);
+  }, []);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     async function checkAuth() {
-      console.log("AdminDashboardLayout: Checking authentication...");
       const { data: { user: authUser }, error } = await supabase.auth.getUser();
-      
-      console.log("AdminDashboardLayout: USER:", authUser);
-      console.log("AdminDashboardLayout: ERROR:", error);
-      
+
       if (error || !authUser) {
-        console.log("AdminDashboardLayout: No user found, redirecting to /login");
         router.push("/login");
         return;
       }
 
-      // Check if user has admin role
       const { data: userData, error: roleError } = await supabase
         .from('users')
         .select('role')
@@ -71,13 +70,11 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
         .single();
 
       if (roleError || !userData) {
-        console.log("AdminDashboardLayout: Error fetching user role or user not found in users table");
         router.push("/login");
         return;
       }
 
       if (userData.role !== 'admin') {
-        console.log("AdminDashboardLayout: User is not admin, redirecting to home");
         router.push("/");
         return;
       }
@@ -254,20 +251,22 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayoutP
         </aside>
 
         {/* Main content */}
-        <main className={`
-          flex-1
+        <main
+          className={`
+          flex-1 min-w-0 relative
           ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}
           transition-all duration-300 ease-in-out
-        `}>
-          {/* Overlay for mobile sidebar */}
+        `}
+        >
           {!sidebarCollapsed && (
             <div
               className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
               onClick={() => setSidebarCollapsed(true)}
             />
           )}
-          
-          {children}
+          <div className="relative z-0 p-4 sm:p-6 lg:p-8 max-w-full overflow-x-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

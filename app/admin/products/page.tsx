@@ -29,6 +29,7 @@ export default function AdminProductsPage() {
     stock: 0,
     sku: "",
     is_active: true,
+    show_on_homepage: true,
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -181,6 +182,7 @@ export default function AdminProductsPage() {
       stock: 0,
       sku: "",
       is_active: true,
+      show_on_homepage: true,
     });
     setSelectedFiles([]);
     setExistingImages([]);
@@ -207,6 +209,7 @@ export default function AdminProductsPage() {
       stock: product.stock || 0,
       sku: product.sku || "",
       is_active: product.is_active ?? true,
+      show_on_homepage: product.show_on_homepage !== false,
     });
     // Set existing images from product.images or fallback to image_url
     const existing = product.images || (product.image_url ? [product.image_url] : []);
@@ -242,7 +245,7 @@ export default function AdminProductsPage() {
 
   return (
     <AdminDashboardLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -604,6 +607,20 @@ export default function AdminProductsPage() {
                       Product is active
                     </label>
                   </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="show_on_homepage"
+                      className="h-4 w-4 text-gray-900 rounded"
+                      checked={formData.show_on_homepage}
+                      onChange={(e) =>
+                        setFormData({ ...formData, show_on_homepage: e.target.checked })
+                      }
+                    />
+                    <label htmlFor="show_on_homepage" className="ml-2 text-sm text-gray-700">
+                      Show on homepage grids
+                    </label>
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
@@ -730,6 +747,20 @@ export default function AdminProductsPage() {
                     />
                     <label htmlFor="edit_is_active" className="ml-2 text-sm text-gray-700">
                       Product is active
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="edit_show_on_homepage"
+                      className="h-4 w-4 text-gray-900 rounded"
+                      checked={formData.show_on_homepage}
+                      onChange={(e) =>
+                        setFormData({ ...formData, show_on_homepage: e.target.checked })
+                      }
+                    />
+                    <label htmlFor="edit_show_on_homepage" className="ml-2 text-sm text-gray-700">
+                      Show on homepage grids
                     </label>
                   </div>
                 </div>
