@@ -7,12 +7,22 @@ import { Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 import { Search, Filter } from "lucide-react";
+import { normalizeCategoryName } from "@/lib/category-nav";
+
+function categoryMatch(productCategory: string | undefined, selected: string) {
+  if (selected === "all") return true;
+  return (
+    !!productCategory &&
+    normalizeCategoryName(productCategory) === normalizeCategoryName(selected)
+  );
+}
 
 // Create a separate component that uses useSearchParams
 function ProductsContent() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || "";
-  
+  const categoryParam = searchParams.get("category") || "";
+
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(["all"]);
@@ -52,11 +62,21 @@ function ProductsContent() {
     setSearchQuery(search);
   }, [search]);
 
+  // Deep-link: /products?category=Men (case-insensitive vs DB category names)
+  useEffect(() => {
+    if (categories.length <= 1) return;
+    const raw = categoryParam.trim();
+    if (!raw) return;
+    const match = categories.find(
+      (c) => c !== "all" && normalizeCategoryName(c) === normalizeCategoryName(raw)
+    );
+    if (match) setSelectedCategory(match);
+  }, [categories, categoryParam]);
+
   // Filter products when category or search changes
   useEffect(() => {
     const filtered = products.filter((p) => {
-      const matchCategory =
-        selectedCategory === "all" || p.category === selectedCategory;
+      const matchCategory = categoryMatch(p.category, selectedCategory);
 
       const matchSearch =
         p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -164,9 +184,9 @@ function ProductsContent() {
                           {category === "all" ? "All Products" : category.charAt(0).toUpperCase() + category.slice(1)}
                         </span>
                         <span className="text-sm text-gray-500">
-                          {category === "all" 
-                            ? products.length 
-                            : products.filter(p => p.category === category).length}
+                          {category === "all"
+                            ? products.length
+                            : products.filter((p) => categoryMatch(p.category, category)).length}
                         </span>
                       </div>
                     </button>

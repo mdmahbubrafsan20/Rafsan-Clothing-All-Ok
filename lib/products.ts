@@ -151,14 +151,10 @@ export async function fetchProducts(options?: FetchProductsOptions): Promise<Pro
   }
 }
 
-/** Paginated active catalog products (homepage / load more). */
-export async function fetchActiveProductsRange(
-  offset: number,
-  limit: number
-): Promise<Product[]> {
+/** Active catalog products for homepage (single load, max 150). */
+export async function fetchActiveProductsForHome(max = 150): Promise<Product[]> {
+  const cap = Math.min(Math.max(1, max), 150);
   try {
-    const from = Math.max(0, offset);
-    const to = from + Math.max(1, limit) - 1;
     const { data, error } = await supabase
       .from('products')
       .select(`
@@ -167,16 +163,16 @@ export async function fetchActiveProductsRange(
       `)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-      .range(from, to);
+      .limit(cap);
 
     if (error) {
-      console.error('Error fetching paginated products:', error);
+      console.error('Error fetching homepage products:', error);
       throw error;
     }
 
     return mapProductRows(data).filter((p) => p.show_on_homepage !== false);
   } catch (error) {
-    console.error('Failed to fetch paginated products:', error);
+    console.error('Failed to fetch homepage products:', error);
     return [];
   }
 }

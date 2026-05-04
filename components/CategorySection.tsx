@@ -1,58 +1,53 @@
-export default function CategorySection() {
-  const categories = [
-    {
-      id: 1,
-      title: "Women's New Arrivals",
-      subtitle: "Discover the latest trends",
-      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      id: 2,
-      title: "Accessories Collection",
-      subtitle: "Complete your look",
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    },
-  ];
+import Link from "next/link";
+import type { Category } from "@/lib/products";
+import {
+  CORE_SHOP_CATEGORIES,
+  normalizeCategoryName,
+  productsCategoryHref,
+} from "@/lib/category-nav";
+
+type Props = {
+  categories: Category[];
+};
+
+/**
+ * Single horizontal category bar for the homepage (matches `/products` filtering via `?category=`).
+ */
+export default function CategorySection({ categories }: Props) {
+  const items: { label: string; href: string }[] = [{ label: "All", href: "/products" }];
+
+  for (const label of CORE_SHOP_CATEGORIES) {
+    items.push({ label, href: productsCategoryHref(label) });
+  }
+
+  for (const c of categories) {
+    const n = normalizeCategoryName(c.name);
+    if (CORE_SHOP_CATEGORIES.some((core) => normalizeCategoryName(core) === n)) continue;
+    items.push({ label: c.name, href: productsCategoryHref(c.name) });
+  }
+
+  const deduped: { label: string; href: string }[] = [];
+  const seenHref = new Set<string>();
+  for (const it of items) {
+    if (seenHref.has(it.href)) continue;
+    seenHref.add(it.href);
+    deduped.push(it);
+  }
 
   return (
-    <section className="px-3 py-4 md:py-8">
-      {/* Single container for all screen sizes with order control */}
-      <div className="space-y-4 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
-        {/* Banner 1 - Mobile: order-1, Desktop: first column */}
-        <div className="relative w-full h-[190px] md:h-[260px] rounded-xl overflow-hidden group order-1">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url(${categories[0].image})` }}
-          />
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute bottom-0 left-0 p-5 text-white">
-            <h3 className="text-[22px] font-bold mb-1">{categories[0].title}</h3>
-            <p className="text-sm opacity-90">{categories[0].subtitle}</p>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-        </div>
-
-        {/* Banner 2 - Mobile: order-2, Desktop: second column */}
-        <div className="relative w-full h-[190px] md:h-[260px] rounded-xl overflow-hidden group order-2">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url(${categories[1].image})` }}
-          />
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute bottom-0 left-0 p-5 text-white">
-            <h3 className="text-[22px] font-bold mb-1">{categories[1].title}</h3>
-            <p className="text-sm opacity-90">{categories[1].subtitle}</p>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-        </div>
-
-        {/* Custom Apparel text block */}
-        {/* Mobile: order-3 (below both banners), Desktop: order-2 (between banners) with col-span-2 */}
-        <div className="bg-cyan-100 rounded-xl p-4 text-center order-3 md:order-2 md:col-span-2 max-md:text-left">
-          <h3 className="text-base md:text-xl font-bold text-gray-900">Custom Apparel</h3>
-          <p className="text-gray-700 mt-1 text-sm md:text-lg">
-            We provide plain t-shirts and apparel for all your custom branding needs
-          </p>
+    <section className="px-3 py-2 md:px-4 md:py-3 border-b border-gray-100 bg-white" aria-label="Shop by category">
+      <div className="max-w-screen-2xl mx-auto">
+        <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {deduped.map((item) => (
+            <Link
+              key={item.href + item.label}
+              href={item.href}
+              prefetch={false}
+              className="shrink-0 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:border-black hover:bg-black hover:text-white transition-colors whitespace-nowrap"
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
       </div>
     </section>

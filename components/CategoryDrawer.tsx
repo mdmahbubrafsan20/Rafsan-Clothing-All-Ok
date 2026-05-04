@@ -5,6 +5,11 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { getAllCategories, type Category } from "@/lib/products";
+import {
+  CORE_SHOP_CATEGORIES,
+  normalizeCategoryName,
+  productsCategoryHref,
+} from "@/lib/category-nav";
 
 type Props = {
   open: boolean;
@@ -13,10 +18,10 @@ type Props = {
 
 const PRESET = [
   { label: "All products", href: "/products" },
-  { label: "Men", href: "/category/men" },
-  { label: "Women", href: "/category/women" },
-  { label: "Kids", href: "/category/kids" },
-  { label: "Sports", href: "/category/sports" },
+  ...CORE_SHOP_CATEGORIES.map((label) => ({
+    label,
+    href: productsCategoryHref(label),
+  })),
 ];
 
 export default function CategoryDrawer({ open, onClose }: Props) {
@@ -86,19 +91,26 @@ export default function CategoryDrawer({ open, onClose }: Props) {
                 {categories.length > 0 && (
                   <>
                     <li className="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      More
+                      More categories
                     </li>
-                    {categories.map((c) => (
-                      <li key={c.id}>
-                        <Link
-                          href={`/category/${encodeURIComponent(c.name)}`}
-                          onClick={onClose}
-                          className="block px-4 py-3 rounded-xl text-gray-800 hover:bg-gray-100"
-                        >
-                          {c.name}
-                        </Link>
-                      </li>
-                    ))}
+                    {categories
+                      .filter(
+                        (c) =>
+                          !CORE_SHOP_CATEGORIES.some(
+                            (core) => normalizeCategoryName(core) === normalizeCategoryName(c.name)
+                          )
+                      )
+                      .map((c) => (
+                        <li key={c.id}>
+                          <Link
+                            href={productsCategoryHref(c.name)}
+                            onClick={onClose}
+                            className="block px-4 py-3 rounded-xl text-gray-800 hover:bg-gray-100"
+                          >
+                            {c.name}
+                          </Link>
+                        </li>
+                      ))}
                   </>
                 )}
               </ul>

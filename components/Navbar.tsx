@@ -10,10 +10,10 @@ import { supabase } from "@/lib/supabase";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "All Products", href: "/products" },
-  { label: "Men's", href: "/category/men" },
-  { label: "Women's", href: "/category/women" },
-  { label: "Kids", href: "/category/kids" },
-  { label: "Sports", href: "/category/sports" },
+  { label: "Men's", href: "/products?category=Men" },
+  { label: "Women's", href: "/products?category=Women" },
+  { label: "Kids", href: "/products?category=Kids" },
+  { label: "Sports", href: "/products?category=Sports" },
 ];
 
 export default function Navbar() {
