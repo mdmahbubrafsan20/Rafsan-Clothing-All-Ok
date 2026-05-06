@@ -338,7 +338,6 @@ export default function ProductPage({ params }: PageProps) {
             <p className="text-gray-700 leading-relaxed">
               {product.description}
             </p>
-            </ul>
           </div>
         </div>
 
