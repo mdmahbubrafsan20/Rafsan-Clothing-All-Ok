@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import Link from "next/link";
 import { getActiveBanners, type Banner } from "@/lib/banners";
 
 const fallbackSlides = [
@@ -76,7 +77,7 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6">
+    <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6 cursor-pointer">
       {/* Slides */}
       {slides.map((slide, i) => (
         <div
@@ -85,32 +86,26 @@ export default function HeroSlider() {
             i === index ? "opacity-100" : "opacity-0"
           }`}
         >
-          <img
-            src={slide.image}
-            alt={slide.alt}
-            className={`absolute w-full h-full object-cover object-center transition-opacity duration-700 ${
-              i === index ? "opacity-100" : "opacity-0"
-            }`}
-          />
-          <div className="absolute inset-0 bg-black/30"></div>
-          <div className="absolute inset-0 flex flex-col items-start justify-end text-left text-white p-4 md:items-center md:justify-center md:text-center">
-            <h2 className="text-4xl sm:text-3xl md:text-4xl font-bold mb-1 md:mb-2">
-              {slide.title}
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg max-w-xl">
-              {slide.description}
-            </p>
-            <button className="mt-3 px-5 py-1.5 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors text-xs md:mt-4 md:px-6 md:py-2 md:text-sm">
-              Shop Now
-            </button>
-          </div>
+          <Link
+            href="/products"
+            className="absolute inset-0 pointer-events-auto"
+          >
+            <img
+              src={slide.image}
+              alt={slide.alt}
+              className={`absolute w-full h-full object-cover object-center transition-opacity duration-700 ${
+                i === index ? "opacity-100" : "opacity-0"
+              }`}
+            />
+            <div className="absolute inset-0 bg-black/30"></div>
+          </Link>
         </div>
       ))}
 
       {/* Navigation arrows */}
       <button
         onClick={goToPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors z-10"
         aria-label="Previous slide"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -119,7 +114,7 @@ export default function HeroSlider() {
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors z-10"
         aria-label="Next slide"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -128,7 +123,7 @@ export default function HeroSlider() {
       </button>
 
       {/* Dots indicator */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {slides.map((_, i) => (
           <button
             key={i}
