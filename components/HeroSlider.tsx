@@ -76,7 +76,7 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] overflow-hidden bg-gray-100 mb-4 md:mb-6">
+    <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6">
       {/* Slides */}
       {slides.map((slide, i) => (
         <div
@@ -88,7 +88,7 @@ export default function HeroSlider() {
           <img
             src={slide.image}
             alt={slide.alt}
-            className={`absolute w-full h-full object-cover transition-opacity duration-700 ${
+            className={`absolute w-full h-full object-cover object-center transition-opacity duration-700 ${
               i === index ? "opacity-100" : "opacity-0"
             }`}
           />
