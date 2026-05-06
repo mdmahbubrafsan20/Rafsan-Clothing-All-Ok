@@ -105,19 +105,19 @@ export default function HeroSlider() {
       {/* Navigation arrows */}
       <button
         onClick={goToPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors z-10"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/35 hover:bg-white/60 text-gray-800/80 p-1.5 rounded-full shadow-sm transition-all duration-200 z-10 hover:shadow"
         aria-label="Previous slide"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-lg transition-colors z-10"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/35 hover:bg-white/60 text-gray-800/80 p-1.5 rounded-full shadow-sm transition-all duration-200 z-10 hover:shadow"
         aria-label="Next slide"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
