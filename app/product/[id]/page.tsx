@@ -338,23 +338,6 @@ export default function ProductPage({ params }: PageProps) {
             <p className="text-gray-700 leading-relaxed">
               {product.description}
             </p>
-            <ul className="mt-6 space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="mr-2">â€¢</span>
-                <span>100% organic cotton for maximum comfort</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">â€¢</span>
-                <span>Pre-shrunk fabric maintains shape after washing</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">â€¢</span>
-                <span>Reinforced stitching for durability</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">â€¢</span>
-                <span>Classic fit suitable for all body types</span>
-              </li>
             </ul>
           </div>
         </div>
