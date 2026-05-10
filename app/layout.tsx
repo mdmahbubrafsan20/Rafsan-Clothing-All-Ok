@@ -7,6 +7,7 @@ import MarketingBanner from "@/components/MarketingBanner";
 import SiteFooter from "@/components/SiteFooter";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import BottomNav from "@/components/BottomNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
           <MarketingBanner />
           <SiteFooter />
           <WhatsAppButton />
+          <BottomNav />
         </CartProvider>
       </body>
     </html>
