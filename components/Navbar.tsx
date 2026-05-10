@@ -1,8 +1,9 @@
 "use client";
 
-import { Menu, Search, ShoppingBag, X, Home, Package, LogIn, UserCircle, Phone } from "lucide-react";
+import { Menu, Search, ShoppingBag, X, UserCircle } from "lucide-react";
 import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { supabase } from "@/lib/supabase";
@@ -53,23 +54,25 @@ export default function Navbar() {
 
         {/* ── MOBILE NAV ── */}
         <div className="relative flex items-center justify-between px-3 py-2 md:hidden h-16">
-          {/* Hamburger */}
-          <button
-            onClick={() => setIsMenuOpen(true)}
-            className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="w-6 h-6 text-gray-700" />
-          </button>
-
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-sm font-bold text-white">R</span>
-            <span className="leading-tight">
-              <span className="block text-base font-bold text-black">RafSan</span>
-              <span className="block text-xs text-gray-500">Clothing</span>
-            </span>
-          </Link>
+          {/* LEFT - Menu + Logo */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-6 h-6 text-gray-700" />
+            </button>
+            <Link href="/" className="flex items-center gap-1.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black shrink-0 overflow-hidden">
+                <Image src="/logo.png" alt="R" width={32} height={32} className="h-8 w-8 object-cover" />
+              </div>
+              <span className="leading-none">
+                <span className="block text-[13px] font-extrabold text-black tracking-tight">RafSan</span>
+                <span className="block text-[9px] text-gray-400 tracking-[0.15em] uppercase">Clothing</span>
+              </span>
+            </Link>
+          </div>
 
           {/* Right icons */}
           <div className="flex items-center gap-1">
@@ -128,8 +131,14 @@ export default function Navbar() {
 
         {/* ── DESKTOP NAV ── */}
         <div className="hidden md:flex container mx-auto px-6 h-full items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-gray-900 tracking-tight">
-            Rafsan Clothing
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black shrink-0">
+              <Image src="/logo.png" alt="R" width={32} height={32} className="h-8 w-8 object-cover rounded-lg" />
+            </div>
+            <span className="leading-none">
+              <span className="block text-base font-extrabold text-black tracking-tight">RafSan</span>
+              <span className="block text-[9px] text-gray-400 tracking-[0.15em] uppercase">Clothing</span>
+            </span>
           </Link>
           <div className="flex items-center gap-8">
             {navLinks.map((link) => (
@@ -187,12 +196,14 @@ export default function Navbar() {
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 pt-5 pb-4 bg-zinc-900">
-                <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-black text-sm font-bold">R</span>
-                  <span>
-                    <span className="block text-base font-bold text-white">RafSan</span>
-                    <span className="block text-xs text-zinc-400">Clothing</span>
-                  </span>
+                <Link href="/" onClick={() => setIsMenuOpen(false)}>
+                  <Image
+                    src="/logo.png"
+                    alt="RafSan Clothing"
+                    width={120}
+                    height={40}
+                    className="h-9 w-auto object-contain brightness-0 invert"
+                  />
                 </Link>
                 <button
                   onClick={() => setIsMenuOpen(false)}
