@@ -70,6 +70,22 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
+        {/* STOCK BADGE */}
+        {product.stock > 0 && product.stock <= 5 && (
+          <div className="absolute top-1.5 left-1.5 z-20 md:top-3 md:left-3" style={{ top: hasDiscount ? "28px" : undefined }}>
+            <span className="inline-flex items-center px-1.5 py-0.5 md:px-3 md:py-1 rounded text-[10px] md:text-xs font-bold bg-orange-500 text-white">
+              মাত্র {product.stock}টি বাকি!
+            </span>
+          </div>
+        )}
+        {product.stock === 0 && (
+          <div className="absolute inset-0 z-20 bg-white/60 flex items-center justify-center">
+            <span className="bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+              স্টক শেষ
+            </span>
+          </div>
+        )}
+
         {/* ADD TO CART — hover on desktop, always visible on mobile */}
         <button
           onClick={handleAddToCart}

@@ -80,7 +80,7 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6 cursor-pointer">
+    <div className="relative w-full h-[280px] sm:h-[300px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6 cursor-pointer">
 
       {/* Loading skeleton */}
       {loading && (

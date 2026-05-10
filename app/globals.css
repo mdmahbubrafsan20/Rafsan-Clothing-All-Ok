@@ -33,20 +33,20 @@ body {
   animation: fade-in-up 0.3s ease-out;
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
-  /* Reduce font sizes for better mobile readability */
   html {
     font-size: 14px;
   }
-  
-  /* Compact spacing for mobile */
   .mobile-compact {
     padding: 0.5rem !important;
     margin: 0.25rem !important;
   }
-  
-  /* Reduce default container padding */
   .container {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
