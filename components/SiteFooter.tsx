@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, FormEvent } from "react";
 
-const HELP_PHONE = "+880 1XXX-XXXXXX";
-const HELP_PHONE_TEL = "+8801XXXXXXXXX";
+const HELP_PHONE = "+880 1610-735064";
+const HELP_PHONE_TEL = "+8801610735064";
 
 const iconClass = "h-6 w-6 sm:h-7 sm:w-7";
 
@@ -52,10 +53,10 @@ function SocialTiktok({ className }: { className?: string }) {
 }
 
 const socialLinks = [
-  { label: "Instagram", href: "https://instagram.com", Icon: SocialInstagram },
-  { label: "Facebook", href: "https://facebook.com", Icon: SocialFacebook },
-  { label: "YouTube", href: "https://youtube.com", Icon: SocialYoutube },
-  { label: "TikTok", href: "https://tiktok.com", Icon: SocialTiktok },
+  { label: "Instagram", href: "https://www.instagram.com/rafsanstoreig", Icon: SocialInstagram },
+  { label: "Facebook", href: "https://www.facebook.com/rafsanstorefb", Icon: SocialFacebook },
+  { label: "YouTube", href: "https://youtube.com/@rafsanclothing", Icon: SocialYoutube },
+  { label: "TikTok", href: "https://tiktok.com/@rafsanclothing", Icon: SocialTiktok },
 ] as const;
 
 const legalLinks = [
@@ -98,6 +99,15 @@ export default function SiteFooter() {
           <p className="mt-2 text-sm text-zinc-400 leading-relaxed max-w-md">
             Customer service: Sun–Thu, 10am–8pm (excluding public holidays). We typically reply within
             a few hours.
+          </p>
+          <p className="mt-2 text-sm text-zinc-400">
+            📧{" "}
+            <a href="mailto:rafsanclothing@gmail.com" className="hover:text-white transition-colors">
+              rafsanclothing@gmail.com
+            </a>
+          </p>
+          <p className="mt-1 text-sm text-zinc-500">
+            📍 Narayanganj, Dhaka Division, Bangladesh
           </p>
         </section>
 
@@ -175,22 +185,35 @@ export default function SiteFooter() {
           <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500 mb-4 text-center md:text-left">
             We accept
           </h2>
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start sm:gap-3">
-            <span className="rounded border border-white/15 bg-white/[0.07] px-3 py-2 text-[10px] font-bold tracking-wider text-white sm:text-xs">
-              VISA
-            </span>
-            <span className="rounded border border-white/15 bg-white/[0.07] px-3 py-2 text-[10px] font-bold tracking-wider text-white sm:text-xs">
-              MC
-            </span>
-            <span className="rounded border border-white/15 bg-[#E2136E]/25 px-3 py-2 text-[10px] font-bold text-pink-100 sm:text-xs">
-              bKash
-            </span>
-            <span className="rounded border border-white/15 bg-[#f7941d]/20 px-3 py-2 text-[10px] font-bold text-orange-100 sm:text-xs">
-              Nagad
-            </span>
-            <span className="rounded border border-white/15 bg-[#8B2F9F]/25 px-3 py-2 text-[10px] font-bold text-purple-100 sm:text-xs">
-              Rocket
-            </span>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start sm:gap-4">
+            {/* VISA */}
+            <div className="flex items-center justify-center rounded-lg border border-white/15 bg-white px-3 h-10 w-16">
+              <Image src="/visa.png" alt="VISA" width={48} height={20} className="object-contain" />
+            </div>
+
+            {/* bKash */}
+            <div className="flex items-center justify-center rounded-lg border border-white/15 bg-white px-2 h-10 w-16">
+              <Image src="/bkash.png" alt="bKash" width={48} height={24} className="object-contain" />
+            </div>
+
+            {/* Nagad */}
+            <div className="flex items-center justify-center rounded-lg border border-white/15 bg-white px-2 h-10 w-16">
+              <Image src="/nagad.png" alt="Nagad" width={48} height={24} className="object-contain" />
+            </div>
+
+            {/* Rocket */}
+            <div className="flex items-center justify-center rounded-lg border border-white/15 bg-white px-2 h-10 w-16">
+              <Image src="/rocket.png" alt="Rocket" width={48} height={24} className="object-contain" />
+            </div>
+
+            {/* Cash on Delivery */}
+            <div className="flex items-center justify-center rounded-lg border border-emerald-500/40 bg-emerald-600 px-3 h-10 gap-1.5">
+              <svg viewBox="0 0 20 20" fill="white" className="h-4 w-4 shrink-0">
+                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd"/>
+              </svg>
+              <span className="text-[10px] font-bold text-white whitespace-nowrap">Cash on Delivery</span>
+            </div>
           </div>
         </section>
 
