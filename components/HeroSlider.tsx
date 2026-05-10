@@ -31,14 +31,17 @@ const fallbackSlides = [
 export default function HeroSlider() {
   const [index, setIndex] = useState(0);
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const data = await getActiveBanners();
-      // Only show slider banners by default (fallback if column missing)
       const slider = data.filter((b) => (b.placement || "homepage_slider") === "homepage_slider");
-      if (!cancelled) setBanners(slider);
+      if (!cancelled) {
+        setBanners(slider);
+        setLoading(false);
+      }
     })();
     return () => {
       cancelled = true;
@@ -78,8 +81,14 @@ export default function HeroSlider() {
 
   return (
     <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6 cursor-pointer">
+
+      {/* Loading skeleton */}
+      {loading && (
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+      )}
+
       {/* Slides */}
-      {slides.map((slide, i) => (
+      {!loading && slides.map((slide, i) => (
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ${
@@ -103,6 +112,8 @@ export default function HeroSlider() {
       ))}
 
       {/* Navigation arrows */}
+      {!loading && (
+        <>
       <button
         onClick={goToPrev}
         className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/35 hover:bg-white/60 text-gray-800/80 p-1.5 rounded-full shadow-sm transition-all duration-200 z-10 hover:shadow"
@@ -123,18 +134,20 @@ export default function HeroSlider() {
       </button>
 
       {/* Dots indicator */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goToSlide(i)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              i === index ? "bg-white scale-125" : "bg-white/50"
-            }`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToSlide(i)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                i === index ? "bg-white scale-125" : "bg-white/50"
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </>
+      )}
     </div>
   );
 }

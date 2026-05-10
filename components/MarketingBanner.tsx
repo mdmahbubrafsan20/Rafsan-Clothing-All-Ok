@@ -45,9 +45,7 @@ export default function MarketingBanner() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-stone-900/25 to-transparent pointer-events-none" />
           </div>
-          <p className="mt-2 text-center text-[11px] text-stone-500 sm:text-left">
-            Placeholder image — swap for your campaign creative in this component.
-          </p>
+
         </div>
       </div>
     </section>
