@@ -196,14 +196,14 @@ export default function Navbar() {
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 pt-5 pb-4 bg-zinc-900">
-                <Link href="/" onClick={() => setIsMenuOpen(false)}>
-                  <Image
-                    src="/logo.png"
-                    alt="RafSan Clothing"
-                    width={120}
-                    height={40}
-                    className="h-9 w-auto object-contain brightness-0 invert"
-                  />
+                <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white font-black text-lg">
+                    R
+                  </div>
+                  <span className="leading-none">
+                    <span className="block text-base font-extrabold text-white tracking-tight">RafSan</span>
+                    <span className="block text-[10px] text-zinc-400 tracking-[0.15em] uppercase">Clothing</span>
+                  </span>
                 </Link>
                 <button
                   onClick={() => setIsMenuOpen(false)}
