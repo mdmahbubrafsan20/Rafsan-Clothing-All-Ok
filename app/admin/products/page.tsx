@@ -29,6 +29,12 @@ export default function AdminProductsPage() {
     sku: "",
     is_active: true,
     show_on_homepage: true,
+    // Brand-quality fields
+    fabric: "",
+    sizes: [] as string[],
+    colors: [] as Array<{ name: string; value: string }>,
+    size_chart: { description: "", unit: "inches", headers: ["Size", "Chest", "Waist", "Length"], rows: [] as string[][] },
+    product_details: { overview: "", fabric_care: "", size_fit: "", shipping_returns: "" },
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -185,6 +191,12 @@ export default function AdminProductsPage() {
       sku: "",
       is_active: true,
       show_on_homepage: true,
+      // Brand-quality fields
+      fabric: "",
+      sizes: [],
+      colors: [],
+      size_chart: { description: "", unit: "inches", headers: ["Size", "Chest", "Waist", "Length"], rows: [] },
+      product_details: { overview: "", fabric_care: "", size_fit: "", shipping_returns: "" },
     });
     setSelectedFiles([]);
     setExistingImages([]);
@@ -211,6 +223,12 @@ export default function AdminProductsPage() {
       sku: product.sku || "",
       is_active: product.is_active ?? true,
       show_on_homepage: product.show_on_homepage !== false,
+      // Brand-quality fields
+      fabric: product.fabric || "",
+      sizes: product.sizes || [],
+      colors: product.colors || [],
+      size_chart: product.size_chart || { description: "", unit: "inches", headers: ["Size", "Chest", "Waist", "Length"], rows: [] },
+      product_details: product.product_details || { overview: "", fabric_care: "", size_fit: "", shipping_returns: "" },
     });
     // Set existing images from product.images or fallback to image_url
     const existing = product.images || (product.image_url ? [product.image_url] : []);
@@ -622,6 +640,171 @@ export default function AdminProductsPage() {
                       Show on homepage grids
                     </label>
                   </div>
+
+                  {/* Brand-quality: Fabric */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fabric Material</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      placeholder="e.g. Premium Cotton Blend"
+                      value={formData.fabric}
+                      onChange={(e) => setFormData({...formData, fabric: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Brand-quality: Sizes Tag Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Available Sizes</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.sizes.map((size, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-gray-900 text-white rounded-full text-sm flex items-center gap-1">
+                          {size}
+                          <button type="button" onClick={() => {
+                            const newSizes = formData.sizes.filter((_, i) => i !== idx);
+                            setFormData({...formData, sizes: newSizes});
+                          }} className="ml-1 hover:text-gray-300">×</button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Type size (e.g. S, M, L, XL)"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const val = (e.target as HTMLInputElement).value.trim();
+                            if (val && !formData.sizes.includes(val)) {
+                              setFormData({...formData, sizes: [...formData.sizes, val]});
+                            }
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                        }}
+                      />
+                      <button type="button" onClick={(e) => {
+                        const input = (e.target as HTMLButtonElement).parentElement?.querySelector('input') as HTMLInputElement;
+                        if (input) {
+                          const val = input.value.trim();
+                          if (val && !formData.sizes.includes(val)) {
+                            setFormData({...formData, sizes: [...formData.sizes, val]});
+                            input.value = '';
+                          }
+                        }
+                      }} className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 text-sm">Add</button>
+                    </div>
+                  </div>
+
+                  {/* Brand-quality: Colors */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Available Colors</label>
+                    <div className="space-y-2 mb-2">
+                      {formData.colors.map((color, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input type="color" value={color.value} onChange={(e) => {
+                            const newColors = [...formData.colors];
+                            newColors[idx] = { ...color, value: e.target.value };
+                            setFormData({...formData, colors: newColors});
+                          }} className="w-10 h-10 rounded cursor-pointer border" />
+                          <input type="text" value={color.name} onChange={(e) => {
+                            const newColors = [...formData.colors];
+                            newColors[idx] = { ...color, name: e.target.value };
+                            setFormData({...formData, colors: newColors});
+                          }} placeholder="Color name" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                          <button type="button" onClick={() => {
+                            setFormData({...formData, colors: formData.colors.filter((_, i) => i !== idx)});
+                          }} className="text-red-500 hover:text-red-700 px-2">✕</button>
+                        </div>
+                      ))}
+                    </div>
+                    <button type="button" onClick={() => {
+                      setFormData({...formData, colors: [...formData.colors, { name: "", value: "#000000" }]});
+                    }} className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 text-sm">
+                      + Add Color
+                    </button>
+                  </div>
+
+                  {/* Brand-quality: Size Chart */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Size Chart</label>
+                    <div className="space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <label className="text-xs text-gray-500">Fit Description</label>
+                          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="e.g. Asian fit, order one size up"
+                            value={formData.size_chart.description}
+                            onChange={(e) => setFormData({...formData, size_chart: { ...formData.size_chart, description: e.target.value }})} />
+                        </div>
+                        <div className="w-32">
+                          <label className="text-xs text-gray-500">Unit</label>
+                          <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            value={formData.size_chart.unit}
+                            onChange={(e) => setFormData({...formData, size_chart: { ...formData.size_chart, unit: e.target.value }})}>
+                            <option value="inches">inches</option>
+                            <option value="cm">cm</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Column Headers (comma separated)</label>
+                        <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Size, Chest, Waist, Length"
+                          defaultValue={formData.size_chart.headers.join(", ")}
+                          onBlur={(e) => {
+                            const headers = e.target.value.split(",").map(h => h.trim()).filter(Boolean);
+                            setFormData({...formData, size_chart: { ...formData.size_chart, headers }});
+                            e.target.value = headers.join(", ");
+                          }} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Measurement Rows (one per line: Size,Val1,Val2,Val3...)</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={4}
+                          placeholder={'S,36,28,26\nM,38,30,27\nL,40,32,28\nXL,42,34,29'}
+                          defaultValue={formData.size_chart.rows.map(r => r.join(",")).join("\n")}
+                          onBlur={(e) => {
+                            const rows = e.target.value.split("\n").map(line =>
+                              line.split(",").map(v => v.trim()).filter(Boolean)
+                            ).filter(row => row.length > 0);
+                            setFormData({...formData, size_chart: { ...formData.size_chart, rows }});
+                          }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Brand-quality: Product Details (4 sections) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Details</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Overview</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="General product description..."
+                          value={formData.product_details.overview}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, overview: e.target.value }})} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Fabric & Care</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="Machine wash cold. Tumble dry low. Do not bleach..."
+                          value={formData.product_details.fabric_care}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, fabric_care: e.target.value }})} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Size & Fit</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="Model is 5&apos;10&apos;&apos; (178cm) wearing size M. Asian fit - order one size up for loose fit."
+                          value={formData.product_details.size_fit}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, size_fit: e.target.value }})} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Shipping & Returns</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="Free delivery on orders over ৳1000. 7-day easy returns..."
+                          value={formData.product_details.shipping_returns}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, shipping_returns: e.target.value }})} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
@@ -763,6 +946,171 @@ export default function AdminProductsPage() {
                     <label htmlFor="edit_show_on_homepage" className="ml-2 text-sm text-gray-700">
                       Show on homepage grids
                     </label>
+                  </div>
+
+                  {/* Brand-quality: Fabric */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fabric Material</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      placeholder="e.g. Premium Cotton Blend"
+                      value={formData.fabric}
+                      onChange={(e) => setFormData({...formData, fabric: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Brand-quality: Sizes Tag Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Available Sizes</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.sizes.map((size, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-gray-900 text-white rounded-full text-sm flex items-center gap-1">
+                          {size}
+                          <button type="button" onClick={() => {
+                            const newSizes = formData.sizes.filter((_, i) => i !== idx);
+                            setFormData({...formData, sizes: newSizes});
+                          }} className="ml-1 hover:text-gray-300">x</button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Type size (e.g. S, M, L, XL)"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const val = (e.target as HTMLInputElement).value.trim();
+                            if (val && !formData.sizes.includes(val)) {
+                              setFormData({...formData, sizes: [...formData.sizes, val]});
+                            }
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                        }}
+                      />
+                      <button type="button" onClick={(e) => {
+                        const input = (e.target as HTMLButtonElement).parentElement?.querySelector('input') as HTMLInputElement;
+                        if (input) {
+                          const val = input.value.trim();
+                          if (val && !formData.sizes.includes(val)) {
+                            setFormData({...formData, sizes: [...formData.sizes, val]});
+                            input.value = '';
+                          }
+                        }
+                      }} className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 text-sm">Add</button>
+                    </div>
+                  </div>
+
+                  {/* Brand-quality: Colors */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Available Colors</label>
+                    <div className="space-y-2 mb-2">
+                      {formData.colors.map((color, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input type="color" value={color.value} onChange={(e) => {
+                            const newColors = [...formData.colors];
+                            newColors[idx] = { ...color, value: e.target.value };
+                            setFormData({...formData, colors: newColors});
+                          }} className="w-10 h-10 rounded cursor-pointer border" />
+                          <input type="text" value={color.name} onChange={(e) => {
+                            const newColors = [...formData.colors];
+                            newColors[idx] = { ...color, name: e.target.value };
+                            setFormData({...formData, colors: newColors});
+                          }} placeholder="Color name" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                          <button type="button" onClick={() => {
+                            setFormData({...formData, colors: formData.colors.filter((_, i) => i !== idx)});
+                          }} className="text-red-500 hover:text-red-700 px-2">x</button>
+                        </div>
+                      ))}
+                    </div>
+                    <button type="button" onClick={() => {
+                      setFormData({...formData, colors: [...formData.colors, { name: "", value: "#000000" }]});
+                    }} className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 text-sm">
+                      + Add Color
+                    </button>
+                  </div>
+
+                  {/* Brand-quality: Size Chart */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Size Chart</label>
+                    <div className="space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <label className="text-xs text-gray-500">Fit Description</label>
+                          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="e.g. Asian fit, order one size up"
+                            value={formData.size_chart.description}
+                            onChange={(e) => setFormData({...formData, size_chart: { ...formData.size_chart, description: e.target.value }})} />
+                        </div>
+                        <div className="w-32">
+                          <label className="text-xs text-gray-500">Unit</label>
+                          <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            value={formData.size_chart.unit}
+                            onChange={(e) => setFormData({...formData, size_chart: { ...formData.size_chart, unit: e.target.value }})}>
+                            <option value="inches">inches</option>
+                            <option value="cm">cm</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Column Headers (comma separated)</label>
+                        <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Size, Chest, Waist, Length"
+                          defaultValue={formData.size_chart.headers.join(", ")}
+                          onBlur={(e) => {
+                            const headers = e.target.value.split(",").map(h => h.trim()).filter(Boolean);
+                            setFormData({...formData, size_chart: { ...formData.size_chart, headers }});
+                            e.target.value = headers.join(", ");
+                          }} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Measurement Rows (one per line: Size,Val1,Val2,Val3...)</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={4}
+                          placeholder={"S,36,28,26\nM,38,30,27\nL,40,32,28\nXL,42,34,29"}
+                          defaultValue={formData.size_chart.rows.map(r => r.join(",")).join("\n")}
+                          onBlur={(e) => {
+                            const rows = e.target.value.split("\n").map(line =>
+                              line.split(",").map(v => v.trim()).filter(Boolean)
+                            ).filter(row => row.length > 0);
+                            setFormData({...formData, size_chart: { ...formData.size_chart, rows }});
+                          }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Brand-quality: Product Details (4 sections) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Details</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Overview</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="General product description..."
+                          value={formData.product_details.overview}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, overview: e.target.value }})} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Fabric and Care</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="Machine wash cold. Tumble dry low. Do not bleach..."
+                          value={formData.product_details.fabric_care}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, fabric_care: e.target.value }})} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Size and Fit</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="Model is 5&apos;10&apos;&apos; (178cm) wearing size M. Asian fit..."
+                          value={formData.product_details.size_fit}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, size_fit: e.target.value }})} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Shipping and Returns</label>
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
+                          placeholder="Free delivery on orders over 1000 BDT. 7-day easy returns..."
+                          value={formData.product_details.shipping_returns}
+                          onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, shipping_returns: e.target.value }})} />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end space-x-3 mt-6">

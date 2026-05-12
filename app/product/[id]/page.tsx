@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
-import { X, ZoomIn } from "lucide-react";
+import SizeChartModal from "@/components/SizeChartModal";
+import { X, ZoomIn, Ruler } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { fetchProductById, Product } from "@/lib/products";
 
@@ -22,6 +23,8 @@ export default function ProductPage({ params }: PageProps) {
   const [showToast, setShowToast] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("M");
   const [selectedColor, setSelectedColor] = useState<string>("Black");
+  const [activeTab, setActiveTab] = useState<"description" | "size-chart" | "reviews">("description");
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,14 +229,30 @@ export default function ProductPage({ params }: PageProps) {
 
             {/* Size Selector */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Select Size
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Select Size
+                </h3>
+                {product.size_chart?.rows && product.size_chart.rows.length > 0 && (
+                  <button
+                    onClick={() => setIsSizeChartOpen(true)}
+                    className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 font-medium underline-offset-2 hover:underline transition-all"
+                  >
+                    <Ruler className="w-4 h-4" />
+                    Size Guide
+                  </button>
+                )}
+              </div>
               <div className="flex flex-wrap gap-3">
                 {product.sizes?.map((size) => (
                   <button
                     key={size}
-                    className="px-5 py-3 border-2 border-gray-300 rounded-lg hover:border-black font-medium text-gray-800 hover:text-black transition-colors"
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-5 py-3 border-2 rounded-lg font-medium transition-colors ${
+                      selectedSize === size
+                        ? "border-black bg-black text-white"
+                        : "border-gray-300 text-gray-800 hover:border-black"
+                    }`}
                   >
                     {size}
                   </button>
@@ -329,16 +348,146 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Description Section */}
+        {/* Brand-quality: Tabbed Details Section */}
         <div className="mt-16 pt-8 border-t border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            DESCRIPTION
-          </h2>
-          <div className="prose prose-gray max-w-none">
-            <p className="text-gray-700 leading-relaxed">
-              {product.description}
-            </p>
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
+            {[
+              { key: "description", label: "Description" },
+              { key: "size-chart", label: "Size Chart" },
+              { key: "reviews", label: "Reviews" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key as typeof activeTab);
+                  if (tab.key === "size-chart") setIsSizeChartOpen(true);
+                }}
+                className={`px-6 py-3 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${
+                  activeTab === tab.key
+                    ? "border-black text-black"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
+
+          {/* Description Tab */}
+          {activeTab === "description" && (
+            <div className="space-y-8">
+              {/* Legacy description */}
+              {product.description && (
+                <div className="prose prose-gray max-w-none">
+                  <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                </div>
+              )}
+
+              {/* Structured product details (4 sections) */}
+              {product.product_details && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { label: "Overview", key: "overview" as const },
+                    { label: "Fabric & Care", key: "fabric_care" as const },
+                    { label: "Size & Fit", key: "size_fit" as const },
+                    { label: "Shipping & Returns", key: "shipping_returns" as const },
+                  ]
+                    .filter(({ key }) => product.product_details?.[key])
+                    .map(({ label, key }) => (
+                      <div key={key} className="bg-gray-50 rounded-xl p-5">
+                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-gray-900 rounded-full" />
+                          {label}
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                          {product.product_details?.[key]}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Size Chart Tab */}
+          {activeTab === "size-chart" && (
+            <div>
+              {product.size_chart?.rows && product.size_chart.rows.length > 0 ? (
+                <div className="space-y-4">
+                  {product.size_chart.description && (
+                    <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg">
+                      <p className="text-sm text-amber-800">
+                        <strong>Note:</strong> {product.size_chart.description}
+                      </p>
+                    </div>
+                  )}
+                  <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-900">
+                          {product.size_chart.headers.map((header, idx) => (
+                            <th
+                              key={idx}
+                              className={`px-4 py-3 text-center font-semibold text-white ${idx === 0 ? "text-left" : ""}`}
+                            >
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {product.size_chart.rows.map((row, rowIdx) => (
+                          <tr
+                            key={rowIdx}
+                            className={`border-t border-gray-100 ${rowIdx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                          >
+                            {row.map((cell, cellIdx) => (
+                              <td
+                                key={cellIdx}
+                                className={`px-4 py-3 text-center text-gray-700 ${cellIdx === 0 ? "font-bold text-gray-900" : ""}`}
+                              >
+                                {cell}
+                                {cellIdx > 0 && product.size_chart?.unit && (
+                                  <span className="text-xs text-gray-400 ml-0.5">
+                                    {product.size_chart.unit === "cm" ? " cm" : "\""}
+                                  </span>
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {product.size_chart.unit && (
+                    <p className="text-xs text-gray-400 mt-2 text-center">
+                      All measurements in {product.size_chart.unit}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Ruler className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No size chart available</p>
+                  <p className="text-gray-400 text-sm mt-1">This product does not have size measurements yet.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Reviews Tab */}
+          {activeTab === "reviews" && (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Customer Reviews</h3>
+              <p className="text-gray-500 text-sm">Coming soon. Be the first to review this product!</p>
+            </div>
+          )}
         </div>
 
         {/* You May Also Like */}
@@ -361,6 +510,14 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         </div>
       </main>
+
+      {/* Size Guide Modal */}
+      <SizeChartModal
+        isOpen={isSizeChartOpen}
+        onClose={() => setIsSizeChartOpen(false)}
+        sizeChart={product.size_chart}
+        productName={product.name}
+      />
 
       <BottomNav />
 

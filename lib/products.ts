@@ -1,5 +1,21 @@
 import { supabase } from './supabase';
 
+// Size chart structure - per-product custom measurements
+export type SizeChart = {
+  description: string;   // Fit notes, e.g. "Asian fit, order one size up"
+  unit: string;          // Measurement unit: "inches" | "cm"
+  headers: string[];     // Column headers: ["Size", "Chest", "Waist", "Length"]
+  rows: string[][];      // Measurement rows: [["S","36","28","26"],["M","38","30","27"],...]
+};
+
+// Structured product description sections
+export type ProductDetails = {
+  overview: string;         // General product description
+  fabric_care: string;      // Fabric info + washing instructions
+  size_fit: string;         // Size & fit notes
+  shipping_returns: string; // Shipping + return policy info
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -21,6 +37,10 @@ export type Product = {
   colors?: Array<{ name: string; value: string }>;
   /** When false, hide from storefront grids (admin toggle). */
   show_on_homepage?: boolean;
+  /** Per-product size chart with measurements. */
+  size_chart?: SizeChart;
+  /** Structured product description sections. */
+  product_details?: ProductDetails;
 };
 
 export type Category = {
@@ -225,6 +245,12 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         sku: product.sku,
         is_active: product.is_active ?? true,
         show_on_homepage: product.show_on_homepage ?? true,
+        // New brand-quality fields
+        fabric: product.fabric || null,
+        sizes: product.sizes || [],
+        colors: product.colors || [],
+        size_chart: product.size_chart || null,
+        product_details: product.product_details || null,
       }])
       .select()
       .single();
@@ -276,6 +302,23 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
     // Only include images if provided
     if (images !== undefined) {
       updateData.images = images;
+    }
+    
+    // New brand-quality fields
+    if (updates.fabric !== undefined) {
+      updateData.fabric = updates.fabric || null;
+    }
+    if (updates.sizes !== undefined) {
+      updateData.sizes = updates.sizes;
+    }
+    if (updates.colors !== undefined) {
+      updateData.colors = updates.colors;
+    }
+    if (updates.size_chart !== undefined) {
+      updateData.size_chart = updates.size_chart || null;
+    }
+    if (updates.product_details !== undefined) {
+      updateData.product_details = updates.product_details || null;
     }
     
     const { data, error } = await supabase
