@@ -4,8 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import ProductCard from "@/components/ProductCard";
-import SizeChartModal from "@/components/SizeChartModal";
-import { X, ZoomIn, Ruler, ShoppingBag, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ZoomIn, Ruler, ShoppingBag, Zap, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { fetchProductById, Product } from "@/lib/products";
 
@@ -20,7 +19,7 @@ export default function ProductPage({ params }: PageProps) {
   const [showToast, setShowToast] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
-  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
+  const [showSizeChart, setShowSizeChart] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -235,10 +234,11 @@ export default function ProductPage({ params }: PageProps) {
                 <span className="text-sm font-bold text-gray-900">Select Size</span>
                 {product.size_chart ? (
                   <button
-                    onClick={() => setIsSizeChartOpen(true)}
+                    onClick={() => setShowSizeChart(v => !v)}
                     className="flex items-center gap-1 text-xs text-gray-500 underline underline-offset-2"
                   >
                     <Ruler className="w-3 h-3" /> Size Guide
+                    {showSizeChart ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </button>
                 ) : null}
               </div>
@@ -257,6 +257,45 @@ export default function ProductPage({ params }: PageProps) {
                   </button>
                 ))}
               </div>
+
+              {/* Inline Size Chart */}
+              {showSizeChart && product.size_chart && (() => {
+                const raw = product.size_chart as any;
+                let parsed: { headers: string[]; rows: string[][] } | null = null;
+                if (typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
+                  parsed = raw;
+                } else if (typeof raw === "string" || (typeof raw === "object" && raw.description)) {
+                  const text = typeof raw === "string" ? raw : raw.description || "";
+                  const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
+                  if (lines.length >= 2) {
+                    const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+                    parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
+                  }
+                }
+                if (!parsed) return null;
+                return (
+                  <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-gray-900">
+                          {parsed.headers.map((h, i) => (
+                            <th key={i} className={`px-2 py-2.5 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsed.rows.map((row, ri) => (
+                          <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                            {row.map((cell, ci) => (
+                              <td key={ci} className={`px-2 py-2 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -337,13 +376,13 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Sticky bottom CTA — BottomNav এর উপরে, WhatsApp এর বাম দিকে */}
+        {/* Sticky bottom CTA */}
         <div className="fixed bottom-16 left-0 right-0 z-40 px-4 pb-3 pt-2 bg-white border-t border-gray-100 shadow-lg">
-          <div className="flex gap-3 pr-16">
+          <div className="flex gap-3">
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-black text-black font-bold rounded-2xl text-sm hover:bg-gray-50 disabled:opacity-40"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-black text-black font-bold rounded-2xl text-sm hover:bg-gray-50 disabled:opacity-40 active:scale-95 transition-transform"
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
@@ -351,7 +390,7 @@ export default function ProductPage({ params }: PageProps) {
             <button
               onClick={handleBuyNow}
               disabled={product.stock === 0}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-black text-white font-bold rounded-2xl text-sm hover:bg-gray-800 disabled:opacity-40"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-black text-white font-bold rounded-2xl text-sm hover:bg-gray-800 disabled:opacity-40 active:scale-95 transition-transform"
             >
               <Zap className="w-4 h-4" />
               Buy Now
@@ -434,9 +473,10 @@ export default function ProductPage({ params }: PageProps) {
               <div className="mb-5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold text-gray-900">Select Size</span>
-                  {product.size_chart?.rows?.length ? (
-                    <button onClick={() => setIsSizeChartOpen(true)} className="flex items-center gap-1 text-sm text-gray-500 underline">
+                  {product.size_chart ? (
+                    <button onClick={() => setShowSizeChart(v => !v)} className="flex items-center gap-1 text-sm text-gray-500 underline">
                       <Ruler className="w-4 h-4" /> Size Guide
+                      {showSizeChart ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
                   ) : null}
                 </div>
@@ -451,6 +491,44 @@ export default function ProductPage({ params }: PageProps) {
                     </button>
                   ))}
                 </div>
+                {/* Inline Size Chart - Desktop */}
+                {showSizeChart && product.size_chart && (() => {
+                  const raw = product.size_chart as any;
+                  let parsed: { headers: string[]; rows: string[][] } | null = null;
+                  if (typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
+                    parsed = raw;
+                  } else if (typeof raw === "string" || (typeof raw === "object" && raw.description)) {
+                    const text = typeof raw === "string" ? raw : raw.description || "";
+                    const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
+                    if (lines.length >= 2) {
+                      const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+                      parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
+                    }
+                  }
+                  if (!parsed) return null;
+                  return (
+                    <div className="mt-3 rounded-xl overflow-hidden border border-gray-200">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-900">
+                            {parsed.headers.map((h, i) => (
+                              <th key={i} className={`px-3 py-3 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsed.rows.map((row, ri) => (
+                            <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                              {row.map((cell, ci) => (
+                                <td key={ci} className={`px-3 py-2.5 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
               </div>
             ) : null}
 
@@ -483,11 +561,11 @@ export default function ProductPage({ params }: PageProps) {
 
             {/* CTA */}
             <div className="flex gap-4">
-              <button onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1 py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 disabled:opacity-40">
-                Buy Now
+              <button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 py-4 border-2 border-black font-bold rounded-xl hover:bg-gray-50 disabled:opacity-40 flex items-center justify-center gap-2">
+                <ShoppingBag className="w-5 h-5" /> Add to Cart
               </button>
-              <button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 py-4 border-2 border-black font-bold rounded-xl hover:bg-gray-50 disabled:opacity-40">
-                Add to Cart
+              <button onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1 py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 disabled:opacity-40 flex items-center justify-center gap-2">
+                <Zap className="w-5 h-5" /> Buy Now
               </button>
             </div>
 
@@ -498,14 +576,6 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-
-      {/* Size Chart Modal */}
-      <SizeChartModal
-        isOpen={isSizeChartOpen}
-        onClose={() => setIsSizeChartOpen(false)}
-        sizeChart={product.size_chart}
-        productName={shortName}
-      />
 
       {/* Toast */}
       {showToast && (
