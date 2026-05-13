@@ -321,6 +321,15 @@ CREATE POLICY "Users can manage their own notifications"
   ON notifications FOR ALL 
   USING (auth.uid() = user_id);
 
+-- Performance indexes for products table
+CREATE INDEX IF NOT EXISTS idx_products_is_active ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_category_is_active ON products(category_id, is_active);
+
+-- Performance indexes for banners table
+CREATE INDEX IF NOT EXISTS idx_banners_is_active ON banners(is_active);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);

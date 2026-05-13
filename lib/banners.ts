@@ -21,7 +21,7 @@ export async function getAllBanners(): Promise<Banner[]> {
   try {
     const { data, error } = await supabase
       .from('banners')
-      .select('*')
+      .select('id, title, description, image_url, link_url, is_active, position, placement, start_date, end_date, created_at, updated_at')
       .order('position', { ascending: true })
       .order('created_at', { ascending: false });
 
@@ -42,7 +42,7 @@ export async function getActiveBanners(): Promise<Banner[]> {
   try {
     const { data, error } = await supabase
       .from('banners')
-      .select('*')
+      .select('id, title, description, image_url, link_url, is_active, position, placement, start_date, end_date, created_at, updated_at')
       .eq('is_active', true)
       .order('position', { ascending: true })
       .order('created_at', { ascending: false });
@@ -64,7 +64,7 @@ export async function getBannerById(id: string): Promise<Banner | null> {
   try {
     const { data, error } = await supabase
       .from('banners')
-      .select('*')
+      .select('id, title, description, image_url, link_url, is_active, position, placement, start_date, end_date, created_at, updated_at')
       .eq('id', id)
       .single();
 

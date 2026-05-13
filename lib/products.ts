@@ -60,7 +60,7 @@ export async function getProductsByCategory(category: string): Promise<Product[]
       .select(
         `
         *,
-        categories!inner (*)
+        categories!inner (id, name)
       `
       )
       .eq('categories.name', category)
@@ -79,7 +79,7 @@ export async function getProductsByCategory(category: string): Promise<Product[]
         .select(
           `
         *,
-        categories!inner (*)
+        categories!inner (id, name)
       `
         )
         .ilike('categories.name', category)
@@ -108,7 +108,7 @@ export async function getAllCategories(): Promise<Category[]> {
   try {
     const { data, error } = await supabase
       .from('categories')
-      .select('*')
+      .select('id, name, description, image_url, created_at, updated_at')
       .order('name', { ascending: true });
 
     if (error) {
@@ -142,8 +142,9 @@ export async function fetchProducts(options?: FetchProductsOptions): Promise<Pro
     let query = supabase
       .from('products')
       .select(`
-        *,
-        categories (*)
+        id, name, description, price, original_price, image_url, stock, sku,
+        is_active, show_on_homepage, created_at,
+        categories (id, name)
       `)
       .order('created_at', { ascending: false });
 
@@ -178,8 +179,9 @@ export async function fetchActiveProductsForHome(max = 150): Promise<Product[]> 
     const { data, error } = await supabase
       .from('products')
       .select(`
-        *,
-        categories (*)
+        id, name, description, price, original_price, image_url, stock, sku,
+        is_active, show_on_homepage, created_at,
+        categories (id, name)
       `)
       .eq('is_active', true)
       .order('created_at', { ascending: false })

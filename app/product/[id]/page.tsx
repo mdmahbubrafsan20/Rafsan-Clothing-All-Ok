@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, ReactNode } from "react";
 import ProductCard from "@/components/ProductCard";
+import RecentlyViewed, { trackRecentlyViewed } from "@/components/RecentlyViewed";
 import { X, ZoomIn, ShoppingBag, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { fetchProductById, Product } from "@/lib/products";
+import { fetchProductById, getProductsByCategory, Product } from "@/lib/products";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,6 +24,9 @@ export default function ProductPage({ params }: PageProps) {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"description" | "size" | "details">("description");
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [sizeExpanded, setSizeExpanded] = useState(false);
 
   const { id } = use(params);
 
@@ -31,10 +35,28 @@ export default function ProductPage({ params }: PageProps) {
       if (!id) return;
       setLoading(true);
       try {
-        const fetchedProduct = await fetchProductById(id);
-        setProduct(fetchedProduct);
-        if (fetchedProduct?.sizes?.length) setSelectedSize(fetchedProduct.sizes[0]);
-        if (fetchedProduct?.colors?.length) setSelectedColor(fetchedProduct.colors[0].name);
+        const productResult = await fetchProductById(id);
+        if (!productResult) {
+          setLoading(false);
+          return;
+        }
+        setProduct(productResult);
+        if (productResult.sizes?.length) setSelectedSize(productResult.sizes[0]);
+        if (productResult.colors?.length) setSelectedColor(productResult.colors[0].name);
+
+        // Track recently viewed
+        trackRecentlyViewed({
+          id: productResult.id,
+          name: productResult.name,
+          price: productResult.price,
+          image: productResult.images?.[0] || productResult.image_url || "",
+        });
+
+        // Fetch related products in parallel
+        if (productResult.category) {
+          const relatedProducts = await getProductsByCategory(productResult.category);
+          setRelatedProducts(relatedProducts.filter((p: Product) => p.id !== id).slice(0, 8));
+        }
       } catch (error) {
         console.error("Failed to fetch product:", error);
       } finally {
@@ -299,82 +321,106 @@ export default function ProductPage({ params }: PageProps) {
             </button>
           </div>
 
-          {/* Description / Size / Details tabs */}
-          <div className="border-t border-gray-100 pt-4">
-            <div className="flex gap-4 mb-4">
-              {["description", "size", "details"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab as any)}
-                  className={`text-sm font-semibold pb-1 border-b-2 transition-colors ${
-                    activeTab === tab ? "border-black text-black" : "border-transparent text-gray-400"
-                  }`}
-                >
-                  {tab === "description" ? "Description" : tab === "size" ? "Size" : "Details"}
-                </button>
-              ))}
+          {/* Description / Size / Details accordion */}
+          <div className="border-t border-gray-100 pt-4 space-y-0">
+            {/* Description */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => setDescExpanded(!descExpanded)}
+                className="w-full flex items-center justify-between py-3 text-sm font-semibold text-gray-900"
+              >
+                Description
+                <span className={`text-lg transition-transform ${descExpanded ? "rotate-180" : ""}`}>▼</span>
+              </button>
+              {descExpanded && (
+                <div className="pb-4 space-y-2">
+                  {(product.description || "No description available.")
+                    .split("\n")
+                    .filter(line => line.trim())
+                    .map((line, i) => (
+                      <p key={i} className="text-sm text-gray-600 leading-relaxed">{line.trim()}</p>
+                    ))}
+                </div>
+              )}
             </div>
 
-            {activeTab === "description" && (
-              <div className="space-y-3">
-                {(product.description || "কোনো বিবরণ দেওয়া হয়নি।")
-                  .split("\n")
-                  .filter(line => line.trim())
-                  .map((line, i) => (
-                    <p key={i} className="text-sm text-gray-600 leading-relaxed">{line.trim()}</p>
-                  ))}
+            {/* Size */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div className="border-b border-gray-100">
+                <button
+                  onClick={() => setSizeExpanded(!sizeExpanded)}
+                  className="w-full flex items-center justify-between py-3 text-sm font-semibold text-gray-900"
+                >
+                  Size Guide
+                  <span className={`text-lg transition-transform ${sizeExpanded ? "rotate-180" : ""}`}>▼</span>
+                </button>
+                {sizeExpanded && (
+                  <div className="pb-4">
+                    {((): ReactNode => {
+                      const raw = product.size_chart as any;
+                      let parsed: { headers: string[]; rows: string[][] } | null = null;
+                      if (raw && typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
+                        parsed = raw;
+                      } else if (raw && (typeof raw === "string" || raw.description)) {
+                        const text = typeof raw === "string" ? raw : raw.description || "";
+                        const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
+                        if (lines.length >= 2) {
+                          const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+                          parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
+                        }
+                      }
+                      if (!parsed) return <p className="text-sm text-gray-400">Size chart not available.</p>;
+                      return (
+                        <div className="rounded-xl overflow-hidden border border-gray-200">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="bg-gray-900">
+                                {parsed.headers.map((h, i) => (
+                                  <th key={i} className={`px-2 py-2.5 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {parsed.rows.map((row, ri) => (
+                                <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                                  {row.map((cell, ci) => (
+                                    <td key={ci} className={`px-2 py-2 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
             )}
 
-            {activeTab === "size" && (() => {
-              const raw = product.size_chart as any;
-              let parsed: { headers: string[]; rows: string[][] } | null = null;
-              if (raw && typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
-                parsed = raw;
-              } else if (raw && (typeof raw === "string" || raw.description)) {
-                const text = typeof raw === "string" ? raw : raw.description || "";
-                const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
-                if (lines.length >= 2) {
-                  const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
-                  parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
-                }
-              }
-              if (!parsed) return <p className="text-sm text-gray-400">Size chart নেই।</p>;
-              return (
-                <div className="rounded-xl overflow-hidden border border-gray-200">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-900">
-                        {parsed.headers.map((h, i) => (
-                          <th key={i} className={`px-2 py-2.5 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {parsed.rows.map((row, ri) => (
-                        <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                          {row.map((cell, ci) => (
-                            <td key={ci} className={`px-2 py-2 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })()}
-
-            {activeTab === "details" && product.product_details && (
-              <div className="space-y-3">
-                {(["overview", "fabric_care", "size_fit", "shipping_returns"] as const).map((key) =>
-                  product.product_details?.[key] ? (
-                    <div key={key} className="bg-gray-50 rounded-xl p-3">
-                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                        {key.replace("_", " ")}
-                      </p>
-                      <p className="text-sm text-gray-700">{product.product_details[key]}</p>
-                    </div>
-                  ) : null
+            {/* Details */}
+            {product.product_details && (
+              <div className="border-b border-gray-100">
+                <button
+                  onClick={() => setDetailsExpanded(!detailsExpanded)}
+                  className="w-full flex items-center justify-between py-3 text-sm font-semibold text-gray-900"
+                >
+                  Details
+                  <span className={`text-lg transition-transform ${detailsExpanded ? "rotate-180" : ""}`}>▼</span>
+                </button>
+                {detailsExpanded && (
+                  <div className="pb-4 space-y-2">
+                    {(["overview", "fabric_care", "size_fit", "shipping_returns"] as const).map((key) =>
+                      product.product_details?.[key] ? (
+                        <div key={key} className="bg-gray-50 rounded-xl p-3">
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                            {key.replace("_", " ")}
+                          </p>
+                          <p className="text-sm text-gray-700">{product.product_details[key]}</p>
+                        </div>
+                      ) : null
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -598,6 +644,40 @@ export default function ProductPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+
+        {/* Related Products — Desktop only */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {relatedProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Recently Viewed — Desktop only */}
+      <div className="hidden md:block max-w-7xl mx-auto px-6 pb-12">
+        <RecentlyViewed />
+      </div>
+
+      {/* ── MOBILE: Related Products + Recently Viewed above footer ── */}
+      <div className="md:hidden">
+        {relatedProducts.length > 0 && (
+          <div className="mt-6 px-4">
+            <h2 className="text-base font-bold text-gray-900 mb-4">Related Products</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+              {relatedProducts.map((p) => (
+                <div key={p.id} className="snap-start shrink-0 w-40">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <RecentlyViewed />
       </div>
 
       {/* Toast */}

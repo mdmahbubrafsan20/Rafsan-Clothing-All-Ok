@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { getActiveBanners, type Banner } from "@/lib/banners";
 
 const fallbackSlides = [
@@ -99,9 +100,12 @@ export default function HeroSlider() {
             href="/products"
             className="absolute inset-0 pointer-events-auto"
           >
-            <img
+            <Image
               src={slide.image}
               alt={slide.alt}
+              fill
+              priority={i === 0}
+              sizes="100vw"
               className={`absolute w-full h-full object-cover object-center transition-opacity duration-700 ${
                 i === index ? "opacity-100" : "opacity-0"
               }`}
