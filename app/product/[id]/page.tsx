@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import ProductCard from "@/components/ProductCard";
-import { X, ZoomIn, Ruler, ShoppingBag, Zap, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ZoomIn, ShoppingBag, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { fetchProductById, Product } from "@/lib/products";
 
@@ -19,11 +19,10 @@ export default function ProductPage({ params }: PageProps) {
   const [showToast, setShowToast] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
-  const [showSizeChart, setShowSizeChart] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"description" | "details">("description");
+  const [activeTab, setActiveTab] = useState<"description" | "size" | "details">("description");
 
   const { id } = use(params);
 
@@ -50,7 +49,6 @@ export default function ProductPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
-        {/* Skeleton */}
         <div className="animate-pulse">
           <div className="w-full aspect-square bg-gray-200" />
           <div className="px-4 py-5 space-y-3">
@@ -77,7 +75,6 @@ export default function ProductPage({ params }: PageProps) {
   const imageUrls = product.images?.length ? product.images : product.image_url ? [product.image_url] : [];
   const mainImageUrl = imageUrls[selectedImageIndex] || "";
 
-  // Shorten long product names
   const shortName = product.name.length > 40
     ? product.name.split("|")[0].trim()
     : product.name;
@@ -127,20 +124,19 @@ export default function ProductPage({ params }: PageProps) {
             />
           )}
 
-          {/* Discount badge */}
           {hasDiscount && (
             <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
               -{discountPercent}%
             </div>
           )}
 
-          {/* Zoom button */}
           <button
             onClick={() => setIsZoomModalOpen(true)}
             className="absolute bottom-3 right-3 w-9 h-9 bg-black/60 text-white rounded-full flex items-center justify-center"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
+
           {imageUrls.length > 1 && (
             <>
               <button
@@ -158,7 +154,6 @@ export default function ProductPage({ params }: PageProps) {
             </>
           )}
 
-          {/* Dots */}
           {imageUrls.length > 1 && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
               {imageUrls.map((_, i) => (
@@ -188,14 +183,13 @@ export default function ProductPage({ params }: PageProps) {
         )}
 
         {/* Product info */}
-        <div className="px-4 pb-32">
-          {/* Name + SKU */}
+        <div className="px-4 pb-6">
+
           <div className="mt-2 mb-3">
             <h1 className="text-lg font-bold text-gray-900 leading-snug">{shortName}</h1>
             {product.sku && <p className="text-xs text-gray-400 mt-1">SKU: {product.sku}</p>}
           </div>
 
-          {/* Price */}
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl font-black text-gray-900">৳{product.price}</span>
             {hasDiscount && (
@@ -208,7 +202,6 @@ export default function ProductPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Stock */}
           <div className="mb-4">
             {product.stock > 10 ? (
               <span className="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">✓ In Stock</span>
@@ -219,7 +212,6 @@ export default function ProductPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Fabric */}
           {product.fabric && (
             <div className="flex items-center gap-2 mb-4 text-sm">
               <span className="text-gray-500">Fabric:</span>
@@ -230,18 +222,7 @@ export default function ProductPage({ params }: PageProps) {
           {/* Size selector */}
           {product.sizes && product.sizes.length > 0 && (
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-gray-900">Select Size</span>
-                {product.size_chart ? (
-                  <button
-                    onClick={() => setShowSizeChart(v => !v)}
-                    className="flex items-center gap-1 text-xs text-gray-500 underline underline-offset-2"
-                  >
-                    <Ruler className="w-3 h-3" /> Size Guide
-                    {showSizeChart ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  </button>
-                ) : null}
-              </div>
+              <span className="text-sm font-bold text-gray-900 block mb-2">Select Size</span>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((size) => (
                   <button
@@ -257,45 +238,6 @@ export default function ProductPage({ params }: PageProps) {
                   </button>
                 ))}
               </div>
-
-              {/* Inline Size Chart */}
-              {showSizeChart && product.size_chart && (() => {
-                const raw = product.size_chart as any;
-                let parsed: { headers: string[]; rows: string[][] } | null = null;
-                if (typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
-                  parsed = raw;
-                } else if (typeof raw === "string" || (typeof raw === "object" && raw.description)) {
-                  const text = typeof raw === "string" ? raw : raw.description || "";
-                  const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
-                  if (lines.length >= 2) {
-                    const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
-                    parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
-                  }
-                }
-                if (!parsed) return null;
-                return (
-                  <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="bg-gray-900">
-                          {parsed.headers.map((h, i) => (
-                            <th key={i} className={`px-2 py-2.5 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parsed.rows.map((row, ri) => (
-                          <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                            {row.map((cell, ci) => (
-                              <td key={ci} className={`px-2 py-2 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })()}
             </div>
           )}
 
@@ -337,10 +279,30 @@ export default function ProductPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Description tabs */}
+          {/* Buttons — Quantity এর নিচে, fixed না */}
+          <div className="flex flex-col gap-2 mb-5">
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-black text-black font-bold rounded-2xl text-sm hover:bg-gray-50 disabled:opacity-40"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Add to Cart
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-black text-white font-bold rounded-2xl text-sm hover:bg-gray-800 disabled:opacity-40"
+            >
+              <Zap className="w-4 h-4" />
+              Buy Now
+            </button>
+          </div>
+
+          {/* Description / Size / Details tabs */}
           <div className="border-t border-gray-100 pt-4">
             <div className="flex gap-4 mb-4">
-              {["description", "details"].map((tab) => (
+              {["description", "size", "details"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
@@ -348,7 +310,7 @@ export default function ProductPage({ params }: PageProps) {
                     activeTab === tab ? "border-black text-black" : "border-transparent text-gray-400"
                   }`}
                 >
-                  {tab === "description" ? "Description" : "Details"}
+                  {tab === "description" ? "Description" : tab === "size" ? "Size" : "Details"}
                 </button>
               ))}
             </div>
@@ -358,6 +320,44 @@ export default function ProductPage({ params }: PageProps) {
                 {product.description || "কোনো বিবরণ দেওয়া হয়নি।"}
               </p>
             )}
+
+            {activeTab === "size" && (() => {
+              const raw = product.size_chart as any;
+              let parsed: { headers: string[]; rows: string[][] } | null = null;
+              if (raw && typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
+                parsed = raw;
+              } else if (raw && (typeof raw === "string" || raw.description)) {
+                const text = typeof raw === "string" ? raw : raw.description || "";
+                const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
+                if (lines.length >= 2) {
+                  const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+                  parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
+                }
+              }
+              if (!parsed) return <p className="text-sm text-gray-400">Size chart নেই।</p>;
+              return (
+                <div className="rounded-xl overflow-hidden border border-gray-200">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-gray-900">
+                        {parsed.headers.map((h, i) => (
+                          <th key={i} className={`px-2 py-2.5 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {parsed.rows.map((row, ri) => (
+                        <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                          {row.map((cell, ci) => (
+                            <td key={ci} className={`px-2 py-2 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
 
             {activeTab === "details" && product.product_details && (
               <div className="space-y-3">
@@ -376,32 +376,11 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Sticky bottom CTA */}
-        <div className="fixed bottom-16 left-0 right-0 z-40 px-4 pb-3 pt-2 bg-white border-t border-gray-100 shadow-lg">
-          <div className="flex gap-3">
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-black text-black font-bold rounded-2xl text-sm hover:bg-gray-50 disabled:opacity-40 active:scale-95 transition-transform"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Add to Cart
-            </button>
-            <button
-              onClick={handleBuyNow}
-              disabled={product.stock === 0}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-black text-white font-bold rounded-2xl text-sm hover:bg-gray-800 disabled:opacity-40 active:scale-95 transition-transform"
-            >
-              <Zap className="w-4 h-4" />
-              Buy Now
-            </button>
-          </div>
-        </div>
+        {/* ── STICKY BOTTOM — Buy Now উপরে, Add to Cart নিচে ── */}
       </div>
 
       {/* ── DESKTOP LAYOUT ── */}
       <div className="hidden md:block max-w-7xl mx-auto px-6 py-8">
-        {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-gray-500 flex items-center gap-2">
           <Link href="/" className="hover:text-black">Home</Link>
           <span>/</span>
@@ -411,7 +390,6 @@ export default function ProductPage({ params }: PageProps) {
         </nav>
 
         <div className="grid grid-cols-2 gap-12">
-          {/* Images */}
           <div>
             <div
               className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 mb-4 cursor-zoom-in"
@@ -444,7 +422,6 @@ export default function ProductPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Info */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-1">{shortName}</h1>
             {product.sku && <p className="text-sm text-gray-400 mb-4">SKU: {product.sku}</p>}
@@ -468,18 +445,10 @@ export default function ProductPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Sizes */}
+            {/* Sizes — size chart সবসময় দেখাবে */}
             {product.sizes?.length ? (
               <div className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-gray-900">Select Size</span>
-                  {product.size_chart ? (
-                    <button onClick={() => setShowSizeChart(v => !v)} className="flex items-center gap-1 text-sm text-gray-500 underline">
-                      <Ruler className="w-4 h-4" /> Size Guide
-                      {showSizeChart ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                    </button>
-                  ) : null}
-                </div>
+                <span className="font-semibold text-gray-900 block mb-2">Select Size</span>
                 <div className="flex gap-3 flex-wrap">
                   {product.sizes.map((size) => (
                     <button
@@ -491,8 +460,7 @@ export default function ProductPage({ params }: PageProps) {
                     </button>
                   ))}
                 </div>
-                {/* Inline Size Chart - Desktop */}
-                {showSizeChart && product.size_chart && (() => {
+                {product.size_chart && (() => {
                   const raw = product.size_chart as any;
                   let parsed: { headers: string[]; rows: string[][] } | null = null;
                   if (typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
@@ -559,17 +527,24 @@ export default function ProductPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="flex gap-4">
-              <button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 py-4 border-2 border-black font-bold rounded-xl hover:bg-gray-50 disabled:opacity-40 flex items-center justify-center gap-2">
+            {/* CTA — উপরে-নিচে */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0}
+                className="w-full py-4 border-2 border-black font-bold rounded-xl hover:bg-gray-50 disabled:opacity-40 flex items-center justify-center gap-2"
+              >
                 <ShoppingBag className="w-5 h-5" /> Add to Cart
               </button>
-              <button onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1 py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 disabled:opacity-40 flex items-center justify-center gap-2">
+              <button
+                onClick={handleBuyNow}
+                disabled={product.stock === 0}
+                className="w-full py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 disabled:opacity-40 flex items-center justify-center gap-2"
+              >
                 <Zap className="w-5 h-5" /> Buy Now
               </button>
             </div>
 
-            {/* Description */}
             <div className="mt-8 pt-6 border-t border-gray-100">
               <p className="text-gray-600 leading-relaxed">{product.description}</p>
             </div>
