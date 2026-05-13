@@ -23,6 +23,12 @@ export const metadata: Metadata = {
   title: "Rafsan Clothing - Premium Fashion",
   description: "Modern ecommerce store for premium clothing",
 };
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export default function RootLayout({
   children,
