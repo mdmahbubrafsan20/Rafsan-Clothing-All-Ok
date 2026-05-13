@@ -316,9 +316,14 @@ export default function ProductPage({ params }: PageProps) {
             </div>
 
             {activeTab === "description" && (
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {product.description || "কোনো বিবরণ দেওয়া হয়নি।"}
-              </p>
+              <div className="space-y-3">
+                {(product.description || "কোনো বিবরণ দেওয়া হয়নি।")
+                  .split("\n")
+                  .filter(line => line.trim())
+                  .map((line, i) => (
+                    <p key={i} className="text-sm text-gray-600 leading-relaxed">{line.trim()}</p>
+                  ))}
+              </div>
             )}
 
             {activeTab === "size" && (() => {
@@ -445,7 +450,7 @@ export default function ProductPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Sizes — size chart সবসময় দেখাবে */}
+            {/* Sizes — only buttons, no chart here */}
             {product.sizes?.length ? (
               <div className="mb-5">
                 <span className="font-semibold text-gray-900 block mb-2">Select Size</span>
@@ -460,43 +465,6 @@ export default function ProductPage({ params }: PageProps) {
                     </button>
                   ))}
                 </div>
-                {product.size_chart && (() => {
-                  const raw = product.size_chart as any;
-                  let parsed: { headers: string[]; rows: string[][] } | null = null;
-                  if (typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
-                    parsed = raw;
-                  } else if (typeof raw === "string" || (typeof raw === "object" && raw.description)) {
-                    const text = typeof raw === "string" ? raw : raw.description || "";
-                    const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
-                    if (lines.length >= 2) {
-                      const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
-                      parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
-                    }
-                  }
-                  if (!parsed) return null;
-                  return (
-                    <div className="mt-3 rounded-xl overflow-hidden border border-gray-200">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="bg-gray-900">
-                            {parsed.headers.map((h, i) => (
-                              <th key={i} className={`px-3 py-3 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {parsed.rows.map((row, ri) => (
-                            <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                              {row.map((cell, ci) => (
-                                <td key={ci} className={`px-3 py-2.5 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                })()}
               </div>
             ) : null}
 
@@ -527,7 +495,7 @@ export default function ProductPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* CTA — উপরে-নিচে */}
+            {/* CTA */}
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleAddToCart}
@@ -545,8 +513,88 @@ export default function ProductPage({ params }: PageProps) {
               </button>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
+            {/* ── Description / Size / Details TABS (Desktop) ── */}
+            <div className="mt-8 border-t border-gray-100 pt-6">
+              <div className="flex gap-6 mb-5 border-b border-gray-100">
+                {(["description", "size", "details"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+                      activeTab === tab ? "border-black text-black" : "border-transparent text-gray-400 hover:text-gray-600"
+                    }`}
+                  >
+                    {tab === "description" ? "Description" : tab === "size" ? "Size" : "Details"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Description Tab */}
+              {activeTab === "description" && (
+                <div className="space-y-3">
+                  {(product.description || "")
+                    .split("\n")
+                    .filter(line => line.trim())
+                    .map((line, i) => (
+                      <p key={i} className="text-gray-600 leading-relaxed text-sm">{line.trim()}</p>
+                    ))}
+                </div>
+              )}
+
+              {/* Size Tab */}
+              {activeTab === "size" && (() => {
+                const raw = product.size_chart as any;
+                let parsed: { headers: string[]; rows: string[][] } | null = null;
+                if (raw && typeof raw === "object" && Array.isArray(raw.rows) && raw.rows.length > 0) {
+                  parsed = raw;
+                } else if (raw && (typeof raw === "string" || raw.description)) {
+                  const text = typeof raw === "string" ? raw : raw.description || "";
+                  const lines = text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.includes("||") && l.length > 3);
+                  if (lines.length >= 2) {
+                    const parsePipe = (line: string) => line.split("||").map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+                    parsed = { headers: parsePipe(lines[0]), rows: lines.slice(1).map(parsePipe) };
+                  }
+                }
+                if (!parsed) return <p className="text-sm text-gray-400">Size chart নেই।</p>;
+                return (
+                  <div className="rounded-xl overflow-hidden border border-gray-200">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-900">
+                          {parsed.headers.map((h, i) => (
+                            <th key={i} className={`px-3 py-3 font-semibold text-white text-center ${i === 0 ? "text-left" : ""}`}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsed.rows.map((row, ri) => (
+                          <tr key={ri} className={`border-t border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                            {row.map((cell, ci) => (
+                              <td key={ci} className={`px-3 py-2.5 text-center text-gray-700 ${ci === 0 ? "font-bold text-gray-900 text-left" : ""}`}>{cell}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+
+              {/* Details Tab */}
+              {activeTab === "details" && product.product_details && (
+                <div className="space-y-3">
+                  {(["overview", "fabric_care", "size_fit", "shipping_returns"] as const).map((key) =>
+                    product.product_details?.[key] ? (
+                      <div key={key} className="bg-gray-50 rounded-xl p-4">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          {key.replace("_", " ")}
+                        </p>
+                        <p className="text-sm text-gray-700">{product.product_details[key]}</p>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
