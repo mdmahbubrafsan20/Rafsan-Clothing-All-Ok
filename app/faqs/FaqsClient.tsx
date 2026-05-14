@@ -1,28 +1,7 @@
-import type { Metadata } from "next";
-import { FAQPageSchema } from "@/app/schema";
-import FaqsClient from "./FaqsClient";
+"use client";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
-
-export const metadata: Metadata = {
-  title: "FAQs — সাধারণ জিজ্ঞাসা | Rafsan Clothing Bangladesh",
-  description:
-    "Rafsan Clothing-এর সাধারণ জিজ্ঞাসা (FAQs)। অর্ডার, ডেলিভারি, পেমেন্ট, সাইজ, রিটার্ন ও এক্সচেঞ্জ সম্পর্কিত সকল প্রশ্নের উত্তর। Bangladeshi fashion brand FAQs.",
-  alternates: { canonical: `${SITE_URL}/faqs` },
-  openGraph: {
-    title: "FAQs — সাধারণ জিজ্ঞাসা | Rafsan Clothing Bangladesh",
-    description:
-      "অর্ডার, ডেলিভারি, পেমেন্ট, সাইজ, রিটার্ন — সব প্রশ্নের উত্তর এক জায়গায়। Rafsan Clothing Bangladesh FAQs।",
-    url: `${SITE_URL}/faqs`,
-    siteName: "Rafsan Clothing",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "FAQs — সাধারণ জিজ্ঞাসা | Rafsan Clothing",
-    description: "অর্ডার, ডেলিভারি, পেমেন্ট, সাইজ, রিটার্ন — সব প্রশ্নের উত্তর এক জায়গায়।",
-  },
-};
+import Link from "next/link";
+import { useState } from "react";
 
 const faqs = [
   {
@@ -87,15 +66,62 @@ const faqs = [
   },
 ];
 
-export default function FaqsPage() {
-  const faqSchemaData = faqs.flatMap((section) =>
-    section.items.map((item) => ({ question: item.q, answer: item.a }))
-  );
-
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <>
-      <FAQPageSchema faqs={faqSchemaData} />
-      <FaqsClient />
-    </>
+    <div className="border-b border-gray-100 last:border-0">
+      <button
+        className="w-full text-left py-4 flex items-center justify-between gap-4 text-gray-900 font-medium hover:text-black transition-colors"
+        onClick={() => setOpen(!open)}
+      >
+        <span>{q}</span>
+        <span className={`text-xl leading-none transition-transform duration-200 ${open ? "rotate-45" : ""}`}>+</span>
+      </button>
+      {open && (
+        <p className="pb-4 text-gray-500 text-sm leading-relaxed">{a}</p>
+      )}
+    </div>
+  );
+}
+
+export default function FaqsClient() {
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
+      <nav className="text-sm text-gray-400 mb-8">
+        <Link href="/" className="hover:text-black transition-colors">Home</Link>
+        <span className="mx-2">/</span>
+        <span className="text-gray-700">FAQs</span>
+      </nav>
+
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">সাধারণ জিজ্ঞাসা (FAQs)</h1>
+      <div className="w-12 h-1 bg-black mb-8"></div>
+      <p className="text-gray-500 mb-10">আমাদের সবচেয়ে বেশি জিজ্ঞেস করা প্রশ্নগুলোর উত্তর নিচে দেওয়া হলো।</p>
+
+      <div className="space-y-8">
+        {faqs.map((section) => (
+          <div key={section.category}>
+            <h2 className="text-base font-bold text-black uppercase tracking-wide mb-2 pb-2 border-b-2 border-black inline-block">
+              {section.category}
+            </h2>
+            <div className="mt-2">
+              {section.items.map((item) => (
+                <FaqItem key={item.q} q={item.q} a={item.a} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-12 bg-gray-50 rounded-2xl p-6 text-center border border-gray-100">
+        <p className="text-gray-600 mb-3">আপনার প্রশ্নের উত্তর পাননি?</p>
+        <p className="text-sm text-gray-400 mb-4">রবিবার–বৃহস্পতিবার, সকাল ১০টা – রাত ৮টা</p>
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition"
+        >
+          হোমে ফিরে যান
+        </Link>
+      </div>
+    </div>
   );
 }
