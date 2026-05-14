@@ -1,6 +1,31 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { FAQPageSchema } from "@/app/schema";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
+
+export const metadata: Metadata = {
+  title: "FAQs — সাধারণ জিজ্ঞাসা | Rafsan Clothing Bangladesh",
+  description:
+    "Rafsan Clothing-এর সাধারণ জিজ্ঞাসা (FAQs)। অর্ডার, ডেলিভারি, পেমেন্ট, সাইজ, রিটার্ন ও এক্সচেঞ্জ সম্পর্কিত সকল প্রশ্নের উত্তর। Bangladeshi fashion brand FAQs.",
+  alternates: { canonical: `${SITE_URL}/faqs` },
+  openGraph: {
+    title: "FAQs — সাধারণ জিজ্ঞাসা | Rafsan Clothing Bangladesh",
+    description:
+      "অর্ডার, ডেলিভারি, পেমেন্ট, সাইজ, রিটার্ন — সব প্রশ্নের উত্তর এক জায়গায়। Rafsan Clothing Bangladesh FAQs।",
+    url: `${SITE_URL}/faqs`,
+    siteName: "Rafsan Clothing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "FAQs — সাধারণ জিজ্ঞাসা | Rafsan Clothing",
+    description: "অর্ডার, ডেলিভারি, পেমেন্ট, সাইজ, রিটার্ন — সব প্রশ্নের উত্তর এক জায়গায়।",
+  },
+};
+
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 const faqs = [
@@ -85,8 +110,15 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FaqsPage() {
+  // Build FAQ schema data from the faqs array
+  const faqSchemaData = faqs.flatMap((section) =>
+    section.items.map((item) => ({ question: item.q, answer: item.a }))
+  );
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
+    <>
+      <FAQPageSchema faqs={faqSchemaData} />
+      <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
       <nav className="text-sm text-gray-400 mb-8">
         <Link href="/" className="hover:text-black transition-colors">Home</Link>
         <span className="mx-2">/</span>
@@ -123,5 +155,6 @@ export default function FaqsPage() {
         </Link>
       </div>
     </div>
+    </>
   );
 }

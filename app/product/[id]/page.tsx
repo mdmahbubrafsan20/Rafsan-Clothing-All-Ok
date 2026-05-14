@@ -1,7 +1,10 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchProductById, getProductsByCategory } from "@/lib/products";
 import ProductPageClient from "./ProductPageClient";
+import { ProductSchema, BreadcrumbSchema } from "@/app/schema";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
 
 export const revalidate = 60;
 
@@ -48,6 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         `Buy ${shortName} at the best price in Bangladesh.`,
       images: imageUrl ? [imageUrl] : [],
     },
+    alternates: { canonical: `${SITE_URL}/product/${id}` },
   };
 }
 
@@ -70,5 +74,24 @@ export default async function ProductPage({ params }: Props) {
     .filter((p) => p.id !== id)
     .slice(0, 8);
 
-  return <ProductPageClient product={product} relatedProducts={filteredRelated} />;
+  return (
+    <>
+      <ProductSchema product={product} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: SITE_URL },
+          ...(product.category
+            ? [
+                {
+                  name: product.category,
+                  url: `${SITE_URL}/category/${encodeURIComponent(product.category.toLowerCase())}`,
+                },
+              ]
+            : []),
+          { name: product.name, url: `${SITE_URL}/product/${product.id}` },
+        ]}
+      />
+      <ProductPageClient product={product} relatedProducts={filteredRelated} />
+    </>
+  );
 }

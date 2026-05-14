@@ -1,91 +1,87 @@
-"use client";
-
-import { useState, useEffect, type ReactNode } from "react";
-import ProductCard from "@/components/ProductCard";
+import type { Metadata } from "next";
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
-import { getProductsByCategory, type Product } from "@/lib/products";
+import ProductCard from "@/components/ProductCard";
+import { getProductsByCategory } from "@/lib/products";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
+import { BreadcrumbSchema } from "@/app/schema";
 
-export default function MenCategoryPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
 
-  useEffect(() => {
-    let cancelled = false;
-    async function loadProducts() {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getProductsByCategory("men");
-        if (!cancelled) setProducts(data);
-      } catch (err: unknown) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    loadProducts();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export const metadata: Metadata = {
+  title: "Men's Collection — Premium Men's Clothing Bangladesh | Rafsan Clothing",
+  description:
+    "Shop premium men's clothing in Bangladesh. Export quality t-shirts, polo shirts, drop shoulder, oversized — free delivery ৳999+, COD available. WhatsApp: 01610-735064",
+  keywords: [
+    "men clothing bangladesh",
+    "mens tshirt bd",
+    "drop shoulder tshirt bd",
+    "oversized tshirt bangladesh",
+    "premium mens fashion bd",
+    "buy mens clothes online bd",
+    "পুরুষের পোশাক বাংলাদেশ",
+  ],
+  openGraph: {
+    title: "Men's Collection — Premium Men's Clothing Bangladesh | Rafsan Clothing",
+    description:
+      "Shop premium men's clothing in Bangladesh. Export quality, free delivery ৳999+.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Men's Collection | Rafsan Clothing Bangladesh",
+    description:
+      "Premium men's clothing — export quality, free delivery ৳999+.",
+    images: ["/og-image.png"],
+  },
+  alternates: { canonical: `${SITE_URL}/category/men` },
+};
 
-  const shell = (children: ReactNode) => (
+export default async function MenCategoryPage() {
+  const products = await getProductsByCategory("men");
+
+  return (
     <>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: SITE_URL },
+          { name: "Men", url: `${SITE_URL}/category/men` },
+        ]}
+      />
       <div className="min-h-screen bg-white max-md:bg-white pb-20 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <div className="mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Men Collection</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Men's Collection
+            </h1>
             <p className="text-gray-600 mt-2 text-sm md:text-base">
-              Discover trendy and comfortable clothing for men
+              Premium men's clothing — export quality, free delivery ৳999+
             </p>
           </div>
-          {children}
+
+          {products.length === 0 ? (
+            <div className="text-center py-16 rounded-xl border border-dashed border-gray-200 bg-gray-50/80">
+              <p className="text-gray-600 mb-4">
+                No products in this category yet.
+              </p>
+              <Link
+                href="/products"
+                className="text-gray-900 font-medium underline"
+              >
+                View all products
+              </Link>
+            </div>
+          ) : (
+            <div className={STORE_PRODUCT_GRID_CLASS}>
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <BottomNav />
     </>
-  );
-
-  if (loading) {
-    return shell(
-      <div className={STORE_PRODUCT_GRID_CLASS}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm animate-pulse"
-          >
-            <div className="aspect-square bg-gray-200" />
-            <div className="p-3 md:p-4">
-              <div className="h-3 md:h-4 bg-gray-200 rounded mb-2" />
-              <div className="h-5 md:h-6 bg-gray-200 rounded w-1/2" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return shell(
-      <div className="text-center py-12">
-        <p className="text-red-600">Error loading products: {error}</p>
-      </div>
-    );
-  }
-
-  if (!products.length) {
-    return shell(
-      <div className="text-center py-12 text-gray-500">No products found in this category.</div>
-    );
-  }
-
-  return shell(
-    <div className={STORE_PRODUCT_GRID_CLASS}>
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
   );
 }

@@ -1,8 +1,26 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
+
+export const metadata: Metadata = {
   title: "Terms & Conditions | Rafsan Clothing",
-  description: "Read the terms and conditions for using Rafsan Clothing website and services.",
+  description:
+    "Read the terms and conditions for using Rafsan Clothing website and services. Learn about our policies for orders, payments, and deliveries in Bangladesh.",
+  alternates: { canonical: `${SITE_URL}/terms` },
+  openGraph: {
+    title: "Terms & Conditions | Rafsan Clothing",
+    description:
+      "Read the terms and conditions for using Rafsan Clothing website and services in Bangladesh.",
+    url: `${SITE_URL}/terms`,
+    siteName: "Rafsan Clothing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms & Conditions | Rafsan Clothing",
+    description: "Read the terms and conditions for using Rafsan Clothing website and services.",
+  },
 };
 
 export default function TermsPage() {

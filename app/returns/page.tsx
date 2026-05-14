@@ -1,8 +1,26 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
+
+export const metadata: Metadata = {
   title: "Return & Exchange Policy | Rafsan Clothing",
-  description: "Understand Rafsan Clothing's easy return and exchange policy.",
+  description:
+    "Understand Rafsan Clothing's easy return and exchange policy. 7-day return guarantee, free exchanges for defective products. Hassle-free shopping in Bangladesh.",
+  alternates: { canonical: `${SITE_URL}/returns` },
+  openGraph: {
+    title: "Return & Exchange Policy | Rafsan Clothing",
+    description:
+      "7-day easy return & exchange policy at Rafsan Clothing. Hassle-free shopping experience in Bangladesh.",
+    url: `${SITE_URL}/returns`,
+    siteName: "Rafsan Clothing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Return & Exchange Policy | Rafsan Clothing",
+    description: "7-day easy return & exchange policy. Hassle-free shopping in Bangladesh.",
+  },
 };
 
 const steps = [

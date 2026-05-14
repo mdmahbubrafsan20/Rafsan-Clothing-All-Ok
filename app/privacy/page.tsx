@@ -1,8 +1,26 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
+
+export const metadata: Metadata = {
   title: "Privacy Policy | Rafsan Clothing",
-  description: "Learn how Rafsan Clothing collects, uses, and protects your personal information.",
+  description:
+    "Learn how Rafsan Clothing collects, uses, and protects your personal information. Our commitment to data privacy and security for Bangladeshi customers.",
+  alternates: { canonical: `${SITE_URL}/privacy` },
+  openGraph: {
+    title: "Privacy Policy | Rafsan Clothing",
+    description:
+      "Learn how Rafsan Clothing protects your personal information and privacy. Secure shopping for Bangladeshi customers.",
+    url: `${SITE_URL}/privacy`,
+    siteName: "Rafsan Clothing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy | Rafsan Clothing",
+    description: "Learn how Rafsan Clothing protects your personal information and privacy.",
+  },
 };
 
 export default function PrivacyPage() {

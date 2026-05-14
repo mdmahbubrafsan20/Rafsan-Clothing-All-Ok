@@ -98,7 +98,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <div className="relative aspect-square bg-white overflow-hidden p-0 m-0">
           <Image
             src={imageToShow}
-            alt={product.name}
+            alt={`${product.name} — Export Quality | Rafsan Clothing Bangladesh`}
             fill
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"

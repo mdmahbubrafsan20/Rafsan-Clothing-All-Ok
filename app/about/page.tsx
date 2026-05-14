@@ -1,8 +1,27 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "About Us | Rafsan Clothing",
-  description: "Learn about Rafsan Clothing — our story, mission, and commitment to quality fashion.",
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
+
+export const metadata: Metadata = {
+  title: "About Us | Rafsan Clothing — Bangladesh Fashion Brand",
+  description:
+    "Learn about Rafsan Clothing — Bangladesh's premium fashion brand. Our story, mission, commitment to export-quality clothing, and dedication to Bangladeshi fashion innovation.",
+  alternates: { canonical: `${SITE_URL}/about` },
+  openGraph: {
+    title: "About Rafsan Clothing — Bangladesh's Premium Fashion Brand",
+    description:
+      "Discover the story behind Rafsan Clothing. Export-quality Bangladeshi fashion, crafted with passion in Narayanganj.",
+    url: `${SITE_URL}/about`,
+    siteName: "Rafsan Clothing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "About Rafsan Clothing — Bangladesh Fashion Brand",
+    description:
+      "Discover the story behind Rafsan Clothing. Export-quality Bangladeshi fashion, crafted with passion.",
+  },
 };
 
 export default function AboutPage() {
