@@ -3,16 +3,25 @@ import CategorySection from "@/components/CategorySection";
 import BottomNav from "@/components/BottomNav";
 import ProductCard from "@/components/ProductCard";
 import { fetchProducts } from "@/lib/products";
+import { getActiveBanners } from "@/lib/banners";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 
-export const dynamic = "force-dynamic";
+// ISR: revalidate every 60 seconds — dramatically faster for returning visitors
+export const revalidate = 60;
 
 export default async function Home() {
-  const products = await fetchProducts({ activeOnly: true });
+  const [products, banners] = await Promise.all([
+    fetchProducts({ activeOnly: true }),
+    getActiveBanners(),
+  ]);
+
+  const sliderBanners = banners.filter(
+    (b) => (b.placement || "homepage_slider") === "homepage_slider"
+  );
 
   return (
     <>
-      <HeroSlider />
+      <HeroSlider banners={sliderBanners} />
       <div className="mb-1 md:mb-3">
         <CategorySection />
       </div>

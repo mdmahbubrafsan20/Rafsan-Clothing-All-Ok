@@ -8,6 +8,7 @@ import SiteFooter from "@/components/SiteFooter";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import BottomNav from "@/components/BottomNav";
+import { getServerUser } from "@/lib/auth-server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,11 +31,14 @@ export const viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetch user server-side — cached per request, no client-side auth call needed
+  const user = await getServerUser();
+
   return (
     <html
       lang="en"
@@ -43,7 +47,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white text-zinc-900">
         <CartProvider>
           <AnnouncementBar />
-          <Navbar />
+          <Navbar user={user} />
           <main className="flex-1 w-full max-w-screen-2xl mx-auto px-0 md:px-6 lg:px-8">
             {children}
           </main>

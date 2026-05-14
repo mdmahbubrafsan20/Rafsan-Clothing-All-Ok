@@ -6,9 +6,10 @@ import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { deliveryFee } from "@/lib/shipping";
+import CheckoutCustomerForm from "@/components/CheckoutCustomerForm";
+import CheckoutOrderSummary from "@/components/CheckoutOrderSummary";
 
 function CheckoutInner() {
   const router = useRouter();
@@ -219,246 +220,23 @@ function CheckoutInner() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left: Customer Form */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Customer Information</h2>
-              
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your phone number"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Address *
-                  </label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your full address"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City *
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your city"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Delivery Options */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Delivery Option</h2>
-                
-                <div className="space-y-3">
-                  <div 
-                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${deliveryOption === "inside" ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
-                    onClick={() => setDeliveryOption("inside")}
-                  >
-                    <div className="flex items-center">
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${deliveryOption === "inside" ? "border-blue-500" : "border-gray-400"}`}>
-                        {deliveryOption === "inside" && <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Inside Dhaka</p>
-                        <p className="text-sm text-gray-500">Standard delivery</p>
-                      </div>
-                    </div>
-                    <span className="font-semibold text-gray-900">৳60</span>
-                  </div>
-
-                  <div 
-                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${deliveryOption === "outside" ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
-                    onClick={() => setDeliveryOption("outside")}
-                  >
-                    <div className="flex items-center">
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${deliveryOption === "outside" ? "border-blue-500" : "border-gray-400"}`}>
-                        {deliveryOption === "outside" && <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Outside Dhaka</p>
-                        <p className="text-sm text-gray-500">Extended delivery</p>
-                      </div>
-                    </div>
-                    <span className="font-semibold text-gray-900">৳120</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment</h2>
-                <div className="space-y-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("cod")}
-                    className={`w-full flex items-center justify-between p-4 border rounded-lg text-left transition-colors ${
-                      paymentMethod === "cod" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                    }`}
-                  >
-                    <div>
-                      <p className="font-medium text-gray-900">Cash on delivery</p>
-                      <p className="text-sm text-gray-500">Pay when you receive your order</p>
-                    </div>
-                    <span
-                      className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        paymentMethod === "cod" ? "border-blue-500" : "border-gray-400"
-                      }`}
-                    >
-                      {paymentMethod === "cod" ? (
-                        <span className="h-2.5 w-2.5 rounded-full bg-blue-500 block" />
-                      ) : null}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("sslcommerz")}
-                    className={`w-full flex items-center justify-between p-4 border rounded-lg text-left transition-colors ${
-                      paymentMethod === "sslcommerz" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                    }`}
-                  >
-                    <div>
-                      <p className="font-medium text-gray-900">SSLCommerz (card / mobile banking)</p>
-                      <p className="text-sm text-gray-500">Secure hosted checkout — requires server env keys</p>
-                    </div>
-                    <span
-                      className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        paymentMethod === "sslcommerz" ? "border-blue-500" : "border-gray-400"
-                      }`}
-                    >
-                      {paymentMethod === "sslcommerz" ? (
-                        <span className="h-2.5 w-2.5 rounded-full bg-blue-500 block" />
-                      ) : null}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Order Summary */}
-            <div className="bg-white rounded-xl p-6 shadow-sm h-fit">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
-              
-              {/* Cart Items */}
-              <div className="mb-6 max-h-96 overflow-y-auto pr-2">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex items-center py-4 border-b border-gray-100 last:border-0">
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                      {item.image ? (
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          sizes="64px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <h3 className="font-medium text-gray-900 line-clamp-1">{item.name}</h3>
-                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">৳{item.price * item.quantity}</p>
-                      <p className="text-sm text-gray-500">৳{item.price} each</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Order Totals */}
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
-                  <span className="font-medium text-gray-900">৳{subtotal}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery</span>
-                  <span className="font-medium text-gray-900">৳{deliveryCost}</span>
-                </div>
-                
-                <div className="h-px bg-gray-200 my-4"></div>
-                
-                <div className="flex justify-between text-lg font-bold">
-                  <span className="text-gray-900">Total</span>
-                  <span className="text-gray-900">৳{total}</span>
-                </div>
-              </div>
-
-              {/* Place Order Button */}
-              <button
-                onClick={handlePlaceOrder}
-                disabled={placingOrder}
-                className="w-full mt-8 py-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {placingOrder ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing Order...
-                  </>
-                ) : paymentMethod === "sslcommerz" ? (
-                  "Pay with SSLCommerz"
-                ) : (
-                  "Place order"
-                )}
-              </button>
-
-              <p className="text-center text-sm text-gray-500 mt-4">
-                By placing your order, you agree to our{" "}
-                <Link href="/terms" className="underline text-gray-700 hover:text-black">
-                  Terms &amp; Conditions
-                </Link>
-                .
-              </p>
-            </div>
+            <CheckoutCustomerForm
+              formData={formData}
+              onInputChange={handleInputChange}
+              deliveryOption={deliveryOption}
+              onDeliveryChange={setDeliveryOption}
+              paymentMethod={paymentMethod}
+              onPaymentChange={setPaymentMethod}
+            />
+            <CheckoutOrderSummary
+              cart={cart}
+              subtotal={subtotal}
+              deliveryCost={deliveryCost}
+              total={total}
+              placingOrder={placingOrder}
+              paymentMethod={paymentMethod}
+              onPlaceOrder={handlePlaceOrder}
+            />
           </div>
         )}
       </main>

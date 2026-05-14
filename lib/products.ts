@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { supabase } from './supabase';
 
 // Size chart structure - per-product custom measurements
@@ -53,7 +54,7 @@ export type Category = {
 };
 
 // Helper function to get products by category
-export async function getProductsByCategory(category: string): Promise<Product[]> {
+export const getProductsByCategory = cache(async (category: string): Promise<Product[]> => {
   try {
     const exact = await supabase
       .from('products')
@@ -101,10 +102,10 @@ export async function getProductsByCategory(category: string): Promise<Product[]
     console.error(`Failed to fetch products for category ${category}:`, error);
     return [];
   }
-}
+});
 
 // Helper function to get all categories
-export async function getAllCategories(): Promise<Category[]> {
+export const getAllCategories = cache(async (): Promise<Category[]> => {
   try {
     const { data, error } = await supabase
       .from('categories')
@@ -121,7 +122,7 @@ export async function getAllCategories(): Promise<Category[]> {
     console.error('Failed to fetch categories:', error);
     return [];
   }
-}
+});
 
 function mapProductRows(data: unknown[] | null): Product[] {
   return (data || []).map((product: any) => ({
@@ -137,7 +138,7 @@ export type FetchProductsOptions = {
 };
 
 // Get all products (admin: all rows; storefront: pass activeOnly)
-export async function fetchProducts(options?: FetchProductsOptions): Promise<Product[]> {
+export const fetchProducts = cache(async (options?: FetchProductsOptions): Promise<Product[]> => {
   try {
     let query = supabase
       .from('products')
@@ -170,10 +171,10 @@ export async function fetchProducts(options?: FetchProductsOptions): Promise<Pro
     console.error('Failed to fetch products:', error);
     return [];
   }
-}
+});
 
 /** Active catalog products for homepage (single load, max 150). */
-export async function fetchActiveProductsForHome(max = 150): Promise<Product[]> {
+export const fetchActiveProductsForHome = cache(async (max = 150): Promise<Product[]> => {
   const cap = Math.min(Math.max(1, max), 150);
   try {
     const { data, error } = await supabase
@@ -197,10 +198,10 @@ export async function fetchActiveProductsForHome(max = 150): Promise<Product[]> 
     console.error('Failed to fetch homepage products:', error);
     return [];
   }
-}
+});
 
 // Get product by ID
-export async function fetchProductById(id: string): Promise<Product | null> {
+export const fetchProductById = cache(async (id: string): Promise<Product | null> => {
   try {
     const { data, error } = await supabase
       .from('products')
@@ -225,7 +226,7 @@ export async function fetchProductById(id: string): Promise<Product | null> {
     console.error(`Failed to fetch product ${id}:`, error);
     return null;
   }
-}
+});
 
 // Create new product
 export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product | null> {

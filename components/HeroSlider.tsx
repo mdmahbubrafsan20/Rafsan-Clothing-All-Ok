@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getActiveBanners, type Banner } from "@/lib/banners";
+import type { Banner } from "@/lib/banners";
 
 const fallbackSlides = [
   {
@@ -29,25 +29,13 @@ const fallbackSlides = [
   },
 ];
 
-export default function HeroSlider() {
-  const [index, setIndex] = useState(0);
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [loading, setLoading] = useState(true);
+interface HeroSliderProps {
+  /** Banners fetched server-side — no client-side data fetching needed. */
+  banners: Banner[];
+}
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const data = await getActiveBanners();
-      const slider = data.filter((b) => (b.placement || "homepage_slider") === "homepage_slider");
-      if (!cancelled) {
-        setBanners(slider);
-        setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export default function HeroSlider({ banners }: HeroSliderProps) {
+  const [index, setIndex] = useState(0);
 
   const slides = useMemo(() => {
     if (banners.length === 0) return fallbackSlides;
@@ -83,13 +71,8 @@ export default function HeroSlider() {
   return (
     <div className="relative w-full h-[210px] sm:h-[220px] md:h-[280px] lg:h-[600px] overflow-hidden bg-gray-100 mb-4 md:mb-6 cursor-pointer">
 
-      {/* Loading skeleton */}
-      {loading && (
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
-      )}
-
       {/* Slides */}
-      {!loading && slides.map((slide, i) => (
+      {slides.map((slide, i) => (
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ${
@@ -116,7 +99,6 @@ export default function HeroSlider() {
       ))}
 
       {/* Navigation arrows */}
-      {!loading && (
         <>
       <button
         onClick={goToPrev}
@@ -151,7 +133,6 @@ export default function HeroSlider() {
           ))}
         </div>
       </>
-      )}
     </div>
   );
 }

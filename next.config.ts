@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Remove X-Powered-By header for security
+  poweredByHeader: false,
+
+  // Enable gzip/brotli compression
+  compress: true,
+
+  // Disable source maps in production for smaller bundles
+  productionBrowserSourceMaps: false,
+
   images: {
     remotePatterns: [
       {

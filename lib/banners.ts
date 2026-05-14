@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { supabase } from './supabase';
 
 export type Banner = {
@@ -17,7 +18,7 @@ export type Banner = {
 };
 
 // Get all banners
-export async function getAllBanners(): Promise<Banner[]> {
+export const getAllBanners = cache(async (): Promise<Banner[]> => {
   try {
     const { data, error } = await supabase
       .from('banners')
@@ -35,10 +36,10 @@ export async function getAllBanners(): Promise<Banner[]> {
     console.error('Failed to fetch banners:', error);
     return [];
   }
-}
+});
 
 // Get active banners (for frontend)
-export async function getActiveBanners(): Promise<Banner[]> {
+export const getActiveBanners = cache(async (): Promise<Banner[]> => {
   try {
     const { data, error } = await supabase
       .from('banners')
@@ -57,10 +58,10 @@ export async function getActiveBanners(): Promise<Banner[]> {
     console.error('Failed to fetch active banners:', error);
     return [];
   }
-}
+});
 
 // Get banner by ID
-export async function getBannerById(id: string): Promise<Banner | null> {
+export const getBannerById = cache(async (id: string): Promise<Banner | null> => {
   try {
     const { data, error } = await supabase
       .from('banners')
@@ -78,7 +79,7 @@ export async function getBannerById(id: string): Promise<Banner | null> {
     console.error(`Failed to fetch banner ${id}:`, error);
     return null;
   }
-}
+});
 
 // Create new banner
 export async function createBanner(banner: Omit<Banner, 'id' | 'created_at' | 'updated_at'>): Promise<Banner | null> {

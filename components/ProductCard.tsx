@@ -8,6 +8,26 @@ import { useCart } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
 import { formatBdt } from "@/lib/format-price";
 
+// Premium fashion placeholder images from Unsplash (module-level constant — avoids per-render recreation)
+const PLACEHOLDER_IMAGES = [
+  "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1470&auto=format&fit=crop", // Premium t-shirt
+  "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1470&auto=format&fit=crop", // Fashion hoodie
+  "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1470&auto=format&fit=crop", // Luxury sweater
+  "https://images.unsplash.com/photo-1505022610485-0249ba5b3675?q=80&w=1470&auto=format&fit=crop", // Casual wear
+  "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=1470&auto=format&fit=crop", // Street fashion
+  "https://images.unsplash.com/photo-1558769132-cb1a40ed0ada?q=80&w=1470&auto=format&fit=crop", // Designer jacket
+] as const;
+
+/** Deterministic placeholder index from product ID hash. */
+function getPlaceholderIndex(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash) % PLACEHOLDER_IMAGES.length;
+}
+
 export default function ProductCard({ product }: { product: Product }) {
   const [imageError, setImageError] = useState(false);
   const { addToCart } = useCart();
@@ -19,28 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
-  // Premium fashion placeholder images from Unsplash
-  const placeholderImages = [
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1470&auto=format&fit=crop", // Premium t-shirt
-    "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1470&auto=format&fit=crop", // Fashion hoodie
-    "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1470&auto=format&fit=crop", // Luxury sweater
-    "https://images.unsplash.com/photo-1505022610485-0249ba5b3675?q=80&w=1470&auto=format&fit=crop", // Casual wear
-    "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=1470&auto=format&fit=crop", // Street fashion
-    "https://images.unsplash.com/photo-1558769132-cb1a40ed0ada?q=80&w=1470&auto=format&fit=crop", // Designer jacket
-  ];
-  
-  // Select placeholder based on product ID hash for variety
-  const getPlaceholderIndex = (id: string) => {
-    // Create a simple hash from the string ID
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-      hash = ((hash << 5) - hash) + id.charCodeAt(i);
-      hash = hash & hash;
-    }
-    return Math.abs(hash) % placeholderImages.length;
-  };
-  
-  const placeholderImage = placeholderImages[getPlaceholderIndex(product.id)];
+  const placeholderImage = PLACEHOLDER_IMAGES[getPlaceholderIndex(product.id)];
   
   const imageToShow =
     !imageError && product.image_url && product.image_url !== ""

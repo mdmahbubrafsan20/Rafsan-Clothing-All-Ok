@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
-import { Filter } from "lucide-react";
+import { Filter, ChevronLeft, ChevronRight } from "lucide-react";
+
+const ITEMS_PER_PAGE = 12;
 
 function normalize(name: string): string {
   return name.trim().toLowerCase().replace(/[''`]/g, "").replace(/s$/, "");
@@ -31,10 +33,16 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
   const categoryParam = searchParams.get("category") || "all";
   const searchParam = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(searchParam);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setSearchQuery(searchParam);
   }, [searchParam]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryParam, searchQuery]);
 
   const allCategories = ["all", ...categories];
 
@@ -58,6 +66,19 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
       return matchCategory && matchSearch;
     });
   }, [initialProducts, categoryParam, searchQuery]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = useMemo(
+    () => filteredProducts.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE),
+    [filteredProducts, safePage]
+  );
+
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [totalPages]);
 
   const categoryFilterActive = (category: string) => {
     if (category === "all") return categoryParam === "all";
@@ -178,11 +199,53 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
                 </button>
               </div>
             ) : (
-              <div className={STORE_PRODUCT_GRID_CLASS}>
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className={STORE_PRODUCT_GRID_CLASS}>
+                  {paginatedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => goToPage(safePage - 1)}
+                      disabled={safePage <= 1}
+                      className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => goToPage(page)}
+                        className={`w-10 h-10 rounded-xl text-sm font-semibold transition-colors ${
+                          page === safePage
+                            ? "bg-black text-white"
+                            : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => goToPage(safePage + 1)}
+                      disabled={safePage >= totalPages}
+                      className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
