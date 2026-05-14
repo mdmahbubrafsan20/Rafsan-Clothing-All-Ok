@@ -55,8 +55,9 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
       ? product.name.split("|")[0].trim()
       : product.name;
 
-  const hasDiscount =
-    product.original_price && product.original_price > product.price;
+  const hasDiscount = Boolean(
+    product.original_price && product.original_price > product.price
+  );
   const discountPercent = hasDiscount
     ? Math.round(
         ((product.original_price! - product.price) / product.original_price!) *
