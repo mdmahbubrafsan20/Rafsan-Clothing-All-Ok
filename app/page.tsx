@@ -95,6 +95,22 @@ export default async function Home() {
           </div>
         )}
       </div>
+      {/* SEO Content Section */}
+      <section className="px-4 py-10 md:px-0 md:py-12 max-w-3xl mx-auto text-center">
+        <h2 className="text-2xl md:text-3xl font-semibold text-zinc-800 mb-4">
+          বাংলাদেশের সেরা প্রিমিয়াম ফ্যাশন ব্র্যান্ড
+        </h2>
+        <p className="text-zinc-600 text-base md:text-lg leading-relaxed mb-4">
+          Rafsan Clothing বাংলাদেশের একটি বিশ্বস্ত Export Quality পোশাকের ব্র্যান্ড। আমরা পুরুষ, মহিলা এবং শিশুদের জন্য প্রিমিয়াম মানের টি-শার্ট, ড্রপ শোল্ডার, ওভারসাইজড এবং স্পোর্টসওয়্যার সংগ্রহ অফার করি।
+        </p>
+        <p className="text-zinc-600 text-base md:text-lg leading-relaxed mb-4">
+          নারায়ণগঞ্জ থেকে পরিচালিত আমাদের স্টোরে রয়েছে ১০০% অরিজিনাল ও উচ্চমানের পোশাক। ৳৯৯৯-এর উপরে অর্ডারে ফ্রি ডেলিভারি এবং ৭ দিনের মধ্যে সহজ Return &amp; Exchange সুবিধা।
+        </p>
+        <p className="text-zinc-500 text-sm md:text-base">
+          Cash on Delivery · bKash · Nagad · Rocket — সকল পেমেন্ট পদ্ধতি গ্রহণযোগ্য।
+        </p>
+      </section>
+
       <BottomNav />
     </>
   );
