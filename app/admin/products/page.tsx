@@ -749,19 +749,18 @@ export default function AdminProductsPage() {
                       <div>
                         <label className="text-xs text-gray-500">Column Headers (comma separated)</label>
                         <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Size, Chest, Waist, Length"
-                          defaultValue={formData.size_chart.headers.join(", ")}
-                          onBlur={(e) => {
+                          value={formData.size_chart.headers.join(", ")}
+                          onChange={(e) => {
                             const headers = e.target.value.split(",").map(h => h.trim()).filter(Boolean);
                             setFormData({...formData, size_chart: { ...formData.size_chart, headers }});
-                            e.target.value = headers.join(", ");
                           }} />
                       </div>
                       <div>
                         <label className="text-xs text-gray-500">Measurement Rows (one per line: Size,Val1,Val2,Val3...)</label>
                         <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={4}
                           placeholder={'S,36,28,26\nM,38,30,27\nL,40,32,28\nXL,42,34,29'}
-                          defaultValue={formData.size_chart.rows.map(r => r.join(",")).join("\n")}
-                          onBlur={(e) => {
+                          value={formData.size_chart.rows.map(r => r.join(",")).join("\n")}
+                          onChange={(e) => {
                             const rows = e.target.value.split("\n").map(line =>
                               line.split(",").map(v => v.trim()).filter(Boolean)
                             ).filter(row => row.length > 0);
@@ -792,7 +791,7 @@ export default function AdminProductsPage() {
                       <div>
                         <label className="text-xs text-gray-500">Size & Fit</label>
                         <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
-                          placeholder="Model is 5&apos;10&apos;&apos; (178cm) wearing size M. Asian fit - order one size up for loose fit."
+                          placeholder="Model is 5'10'' (178cm) wearing size M. Asian fit - order one size up for loose fit."
                           value={formData.product_details.size_fit}
                           onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, size_fit: e.target.value }})} />
                       </div>
@@ -1056,19 +1055,18 @@ export default function AdminProductsPage() {
                       <div>
                         <label className="text-xs text-gray-500">Column Headers (comma separated)</label>
                         <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Size, Chest, Waist, Length"
-                          defaultValue={formData.size_chart.headers.join(", ")}
-                          onBlur={(e) => {
+                          value={formData.size_chart.headers.join(", ")}
+                          onChange={(e) => {
                             const headers = e.target.value.split(",").map(h => h.trim()).filter(Boolean);
                             setFormData({...formData, size_chart: { ...formData.size_chart, headers }});
-                            e.target.value = headers.join(", ");
                           }} />
                       </div>
                       <div>
                         <label className="text-xs text-gray-500">Measurement Rows (one per line: Size,Val1,Val2,Val3...)</label>
                         <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={4}
                           placeholder={"S,36,28,26\nM,38,30,27\nL,40,32,28\nXL,42,34,29"}
-                          defaultValue={formData.size_chart.rows.map(r => r.join(",")).join("\n")}
-                          onBlur={(e) => {
+                          value={formData.size_chart.rows.map(r => r.join(",")).join("\n")}
+                          onChange={(e) => {
                             const rows = e.target.value.split("\n").map(line =>
                               line.split(",").map(v => v.trim()).filter(Boolean)
                             ).filter(row => row.length > 0);
@@ -1099,7 +1097,7 @@ export default function AdminProductsPage() {
                       <div>
                         <label className="text-xs text-gray-500">Size and Fit</label>
                         <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2}
-                          placeholder="Model is 5&apos;10&apos;&apos; (178cm) wearing size M. Asian fit..."
+                          placeholder="Model is 5'10'' (178cm) wearing size M. Asian fit..."
                           value={formData.product_details.size_fit}
                           onChange={(e) => setFormData({...formData, product_details: { ...formData.product_details, size_fit: e.target.value }})} />
                       </div>
