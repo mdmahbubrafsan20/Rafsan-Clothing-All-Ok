@@ -143,8 +143,9 @@ export const fetchProducts = cache(async (options?: FetchProductsOptions): Promi
     let query = supabase
       .from('products')
       .select(`
-        id, name, description, price, original_price, image_url, stock, sku,
+        id, name, description, price, original_price, image_url, images, stock, sku,
         is_active, show_on_homepage, created_at,
+        fabric, sizes, colors, size_chart, product_details,
         categories (id, name)
       `)
       .order('created_at', { ascending: false });
@@ -417,10 +418,13 @@ export async function getProductStats(): Promise<{
 // Category CRUD operations
 export async function createCategory(category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<Category | null> {
   try {
+    const slug = (category as any).slug ||
+      category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const { data, error } = await supabase
       .from('categories')
       .insert([{
         name: category.name,
+        slug,
         description: category.description,
         image_url: category.image_url,
       }])
