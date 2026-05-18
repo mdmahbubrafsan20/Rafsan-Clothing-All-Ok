@@ -15,8 +15,6 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "bn",
     dir: "ltr",
     categories: ["shopping", "fashion", "lifestyle"],
-    keywords:
-      "oversized tshirt bangladesh, drop shoulder tshirt bd, polo shirt bd, rafsan clothing, therafsan, bd brand, কম দামে গেঞ্জি",
     icons: [
       {
         src: "/icon-192.png",
