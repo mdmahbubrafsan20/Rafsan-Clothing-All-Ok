@@ -8,53 +8,73 @@ import { getActiveBanners } from "@/lib/banners";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
 import { OrganizationSchema } from "@/app/schema";
 
-// ISR: revalidate every 60 seconds — dramatically faster for returning visitors
+// ISR: revalidate every 60 seconds
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title:
-    "Rafsan Clothing | Premium Export Quality Fashion Bangladesh | রাফসান ক্লোথিং",
+    "Rafsan Clothing | Oversized T-Shirt, Drop Shoulder, Polo Shirt Bangladesh | কম দামে গেঞ্জি",
   description:
-    "বাংলাদেশের সেরা প্রিমিয়াম ফ্যাশন ব্র্যান্ড Rafsan Clothing। Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+, ক্যাশ অন ডেলিভারি। WhatsApp: 01610-735064",
+    "Rafsan Clothing — বাংলাদেশের সেরা BD Brand therafsan.com। Oversized tshirt, Drop shoulder tshirt bd, Polo shirt, Graphic tshirt, Couple tshirt, কাস্টমাইজ টি-শার্ট। কম দামে গেঞ্জি, Export quality, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery। WhatsApp: 01610-735064",
   keywords: [
-    "bd clothing",
-    "bangladeshi fashion",
-    "bd brand",
-    "bd tshirt",
-    "drop shoulder tshirt bd",
     "oversized tshirt bangladesh",
-    "men clothing bd",
-    "women clothing bangladesh",
-    "premium tshirt bangladesh",
-    "rafsan clothing bangladesh",
-    "export quality clothes bangladesh",
-    "online clothing store bd",
+    "drop shoulder tshirt bd",
+    "buy tshirt online bangladesh",
+    "polo shirt bd",
+    "graphic tshirt bangladesh",
+    "export quality tshirt bd",
+    "কাপল টি শার্ট বাংলাদেশ",
+    "টি শার্ট দাম বাংলাদেশ",
+    "কম দামে গেঞ্জি",
+    "কম দামে টি শার্ট",
+    "কাস্টমাইজ টি-শার্ট",
+    "free delivery clothing bd",
+    "cash on delivery tshirt bd",
+    "ফ্রি ডেলিভারি পোশাক",
+    "rafsan clothing",
+    "therafsan",
+    "the rafsan",
+    "bd brand",
+    "bangladeshi brand",
+    "streetwear bangladesh",
+    "unisex tshirt bd",
+    "eid collection 2025 bangladesh",
+    "online shopping bd tshirt",
     "টি শার্ট বাংলাদেশ",
     "পোশাক অনলাইন",
+    "অনলাইনে কাপড় কেনা",
+    "wholesale tshirt bangladesh",
+    "bulk order tshirt bd",
+    "black tshirt bangladesh",
+    "printed tshirt bd",
+    "cotton tshirt bd",
   ],
   openGraph: {
     title:
-      "Rafsan Clothing | Premium Export Quality Fashion Bangladesh",
+      "Rafsan Clothing | Oversized, Drop Shoulder, Polo T-Shirt Bangladesh — therafsan.com",
     description:
-      "বাংলাদেশের সেরা প্রিমিয়াম ফ্যাশন ব্র্যান্ড। Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+।",
+      "বাংলাদেশের সেরা BD Brand — Oversized, Drop Shoulder, Couple, Graphic tshirt। কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery।",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Rafsan Clothing - Premium Fashion Bangladesh",
+        alt: "Rafsan Clothing — Best T-Shirt Brand Bangladesh | therafsan.com",
       },
     ],
     type: "website",
+    url: "https://therafsan.com",
+    siteName: "Rafsan Clothing",
+    locale: "bn_BD",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rafsan Clothing | Premium Fashion Bangladesh",
+    title: "Rafsan Clothing | Best T-Shirt Brand Bangladesh",
     description:
-      "Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+। WhatsApp: 01610-735064",
+      "Oversized, Drop Shoulder, Polo, Graphic tshirt bd — কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+। WhatsApp: 01610-735064",
     images: ["/og-image.png"],
   },
-  alternates: { canonical: "/" },
+  alternates: { canonical: "https://therafsan.com" },
 };
 
 export default async function Home() {
@@ -95,19 +115,29 @@ export default async function Home() {
           </div>
         )}
       </div>
-      {/* SEO Content Section */}
+
+      {/* SEO Content Section — visible text helps Google rank */}
       <section className="px-4 py-10 md:px-0 md:py-12 max-w-3xl mx-auto text-center">
         <h2 className="text-2xl md:text-3xl font-semibold text-zinc-800 mb-4">
-          বাংলাদেশের সেরা প্রিমিয়াম ফ্যাশন ব্র্যান্ড
+          বাংলাদেশের সেরা T-Shirt Brand — Rafsan Clothing
         </h2>
         <p className="text-zinc-600 text-base md:text-lg leading-relaxed mb-4">
-          Rafsan Clothing বাংলাদেশের একটি বিশ্বস্ত Export Quality পোশাকের ব্র্যান্ড। আমরা পুরুষ, মহিলা এবং শিশুদের জন্য প্রিমিয়াম মানের টি-শার্ট, ড্রপ শোল্ডার, ওভারসাইজড এবং স্পোর্টসওয়্যার সংগ্রহ অফার করি।
+          <strong>Rafsan Clothing (therafsan.com)</strong> — বাংলাদেশের একটি বিশ্বস্ত Bangladeshi Brand।
+          আমরা Oversized T-Shirt, Drop Shoulder T-Shirt, Polo Shirt, Graphic T-Shirt, Couple T-Shirt,
+          Unisex T-Shirt এবং কাস্টমাইজ টি-শার্ট অফার করি। সম্পূর্ণ Export Quality পোশাক — কম দামে গেঞ্জি,
+          সর্বোচ্চ মান নিশ্চিত।
         </p>
         <p className="text-zinc-600 text-base md:text-lg leading-relaxed mb-4">
-          নারায়ণগঞ্জ থেকে পরিচালিত আমাদের স্টোরে রয়েছে ১০০% অরিজিনাল ও উচ্চমানের পোশাক। ৳৯৯৯-এর উপরে অর্ডারে ফ্রি ডেলিভারি এবং ৭ দিনের মধ্যে সহজ Return &amp; Exchange সুবিধা।
+          Black T-Shirt, White T-Shirt, Printed T-Shirt, Cotton T-Shirt, Streetwear Bangladesh —
+          সব ধরনের পোশাক পাবেন এখানে। Wholesale T-Shirt Bangladesh ও Bulk Order এর জন্যও যোগাযোগ করুন।
+          Gym Wear, Sports Jersey, Hoodie Bangladesh — সব কিছু এক জায়গায়।
+        </p>
+        <p className="text-zinc-600 text-base md:text-lg leading-relaxed mb-4">
+          পুরুষের টি শার্ট, মেয়েদের পোশাক অনলাইন, বাচ্চাদের টি শার্ট — পরিবারের সবার জন্য পোশাক।
+          টি শার্ট দাম বাংলাদেশে সবচেয়ে কম। Eid Collection 2025 Bangladesh — এখনই দেখুন।
         </p>
         <p className="text-zinc-500 text-sm md:text-base">
-          Cash on Delivery · bKash · Nagad · Rocket — সকল পেমেন্ট পদ্ধতি গ্রহণযোগ্য।
+          ফ্রি ডেলিভারি ৳৯৯৯+ · Cash on Delivery · bKash · Nagad · Rocket · ৭ দিনের Return গ্যারান্টি
         </p>
       </section>
 

@@ -27,77 +27,116 @@ export const metadata: Metadata = {
   ),
   title: {
     default:
-      "Rafsan Clothing | Premium Export Quality Fashion Bangladesh | রাফসান ক্লোথিং",
-    template: "%s | Rafsan Clothing",
+      "Rafsan Clothing | Oversized & Drop Shoulder T-Shirt Bangladesh | রাফসান ক্লোথিং",
+    template: "%s | Rafsan Clothing — therafsan.com",
   },
   description:
-    "বাংলাদেশের সেরা প্রিমিয়াম ফ্যাশন ব্র্যান্ড Rafsan Clothing। Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+। ১০০% অরিজিনাল গ্যারান্টি। WhatsApp: 01610-735064",
+    "Rafsan Clothing — বাংলাদেশের সেরা BD Brand। Oversized tshirt, Drop shoulder tshirt, Polo shirt, Graphic tshirt, Couple tshirt, কাস্টমাইজ টি-শার্ট। Export quality, কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery। WhatsApp: 01610-735064",
   keywords: [
-    "bd clothing",
-    "bangladeshi fashion",
-    "bd brand",
-    "bd tshirt",
-    "drop shoulder tshirt bd",
+    // 🔥 Core product keywords
     "oversized tshirt bangladesh",
-    "men clothing bd",
-    "women clothing bangladesh",
-    "kids clothing bd",
-    "premium tshirt bangladesh",
-    "custom apparel bangladesh",
-    "online clothing store bd",
-    "dhaka fashion",
-    "narayanganj clothing",
+    "drop shoulder tshirt bd",
+    "buy tshirt online bangladesh",
+    "polo shirt bd",
+    "graphic tshirt bangladesh",
+    "export quality tshirt bd",
+    "online shopping bd tshirt",
+    "wholesale tshirt bangladesh",
+    "bulk order tshirt bd",
+    "streetwear bangladesh",
+    "unisex tshirt bd",
+    "black tshirt bangladesh",
+    "white tshirt bangladesh",
+    "printed tshirt bd",
+    "plain tshirt bangladesh",
+    "cotton tshirt bd",
+    "half sleeve tshirt bangladesh",
+    "full sleeve tshirt bd",
+    "couple matching tshirt bd",
+    "hoodie bangladesh",
+    "sports jersey bangladesh",
+    "gym wear bangladesh",
+    // 🛒 Conversion keywords
+    "free delivery clothing bd",
+    "cash on delivery tshirt bd",
+    "online clothing store bangladesh",
+    "best clothing brand bd",
+    "original tshirt bd",
+    "premium quality tshirt bd",
+    // 🏷️ Brand keywords
+    "rafsan clothing",
+    "therafsan",
+    "the rafsan",
     "rafsan clothing bangladesh",
     "rafsan store bd",
-    "export quality clothes bangladesh",
-    "premium t shirt bd",
-    "online clothing store dhaka",
-    "fashion bangladesh",
-    "custom apparel printing bangladesh",
-    "wholesale t shirt bangladesh",
-    "bulk order clothing bd",
-    "narayanganj fashion store",
-    "dhaka clothing brand",
-    "bangladesh online shopping",
+    "bd brand",
+    "bangladeshi brand",
+    "narayanganj clothing brand",
+    "dhaka tshirt brand",
+    // 🔤 Bengali keywords
+    "কাপল টি শার্ট বাংলাদেশ",
+    "টি শার্ট দাম বাংলাদেশ",
+    "পুরুষের টি শার্ট",
+    "মেয়েদের পোশাক অনলাইন",
+    "কম দামে গেঞ্জি",
+    "কাস্টমাইজ টি-শার্ট",
+    "কম দামে টি শার্ট",
+    "বাচ্চাদের টি শার্ট",
+    "মেয়েদের টি শার্ট",
+    "ছেলেদের গেঞ্জি দাম",
+    "কালো গেঞ্জি",
+    "সাদা গেঞ্জি",
+    "ফ্রি ডেলিভারি পোশাক",
+    "অনলাইনে কাপড় কেনা",
+    "পোলো শার্ট দাম",
     "টি শার্ট বাংলাদেশ",
     "পোশাক অনলাইন",
-    "ফ্যাশন ব্র্যান্ড বাংলাদেশ",
+    // 🗓️ Seasonal
+    "eid collection 2025 bangladesh",
+    "eid tshirt bangladesh",
   ],
-  authors: [{ name: "Rafsan Clothing" }],
+  authors: [{ name: "Rafsan Clothing", url: "https://therafsan.com" }],
   creator: "Rafsan Clothing",
   publisher: "Rafsan Clothing",
+  category: "fashion",
+  classification: "Clothing & Apparel",
   formatDetection: { telephone: true, email: true, address: true },
   openGraph: {
     type: "website",
-    locale: "en_US",
-    alternateLocale: "bn_BD",
+    locale: "bn_BD",
+    alternateLocale: ["en_US"],
     siteName: "Rafsan Clothing",
+    url: "https://therafsan.com",
     title:
-      "Rafsan Clothing | Premium Export Quality Fashion Bangladesh",
+      "Rafsan Clothing | Oversized, Drop Shoulder, Polo T-Shirt Bangladesh",
     description:
-      "বাংলাদেশের সেরা প্রিমিয়াম ফ্যাশন ব্র্যান্ড। Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+।",
+      "বাংলাদেশের সেরা BD Brand — Oversized, Drop Shoulder, Couple, Graphic tshirt। কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery।",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Rafsan Clothing - Premium Fashion Bangladesh",
+        alt: "Rafsan Clothing — Bangladesh's Best T-Shirt Brand | therafsan.com",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rafsan Clothing | Premium Fashion Bangladesh",
+    site: "@rafsanclothing",
+    creator: "@rafsanclothing",
+    title: "Rafsan Clothing | Best T-Shirt Brand Bangladesh",
     description:
-      "Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+। WhatsApp: 01610-735064",
+      "Oversized, Drop Shoulder, Polo, Graphic tshirt bd — কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+। WhatsApp: 01610-735064",
     images: ["/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -106,18 +145,29 @@ export const metadata: Metadata = {
   verification: {
     google: process.env.GOOGLE_VERIFICATION_CODE,
   },
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "https://therafsan.com",
+    languages: {
+      "en-US": "https://therafsan.com",
+      "bn-BD": "https://therafsan.com",
+    },
+  },
   other: {
     "geo.region": "BD-C",
-    "geo.placename": "Narayanganj",
+    "geo.placename": "Narayanganj, Dhaka, Bangladesh",
     "geo.position": "23.6238;90.4994",
     ICBM: "23.6238, 90.4994",
+    "business:contact_data:country_name": "Bangladesh",
+    "business:contact_data:locality": "Narayanganj",
+    "og:price:currency": "BDT",
+    "product:availability": "in stock",
   },
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
 };
 
 export default async function RootLayout({
@@ -125,12 +175,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch user server-side — cached per request, no client-side auth call needed
   const user = await getServerUser();
 
   return (
     <html
-      lang="en"
+      lang="bn"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
@@ -141,6 +190,7 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://wa.me" />
+        <link rel="dns-prefetch" href="https://www.facebook.com" />
         <link rel="preload" as="image" href="/logo.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -148,7 +198,15 @@ export default async function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
+        <meta name="apple-mobile-web-app-title" content="Rafsan Clothing" />
+        <meta name="application-name" content="Rafsan Clothing" />
         <meta name="theme-color" content="#0D0D0D" />
+        <meta name="msapplication-TileColor" content="#0D0D0D" />
+        {/* Language targeting */}
+        <meta httpEquiv="content-language" content="bn, en" />
+        {/* Rich snippet hints */}
+        <meta name="rating" content="General" />
+        <meta name="revisit-after" content="3 days" />
       </head>
       <body className="min-h-full flex flex-col bg-white text-zinc-900">
         <WebSiteSchema />

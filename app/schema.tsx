@@ -1,18 +1,11 @@
 /**
- * Reusable JSON-LD Structured Data Components for Rafsan Clothing (therafsan.com)
- *
- * Usage:
- *   import { OrganizationSchema, ProductSchema, BreadcrumbSchema, WebSiteSchema, FAQPageSchema } from "@/app/schema";
- *
- *   // In any server component:
- *   <OrganizationSchema />
- *   <ProductSchema product={product} />
- *   <BreadcrumbSchema items={[{ name: "Home", url: "https://therafsan.com" }, ...]} />
+ * JSON-LD Structured Data — Rafsan Clothing (therafsan.com)
+ * Full SEO schema: Organization, WebSite, Product, Breadcrumb, FAQ, ItemList
  */
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type BreadcrumbItem = { name: string; url: string };
 
@@ -31,45 +24,72 @@ type ProductForSchema = {
 
 type FAQItem = { question: string; answer: string };
 
-// ─── Organization / ClothingStore Schema ─────────────────────────────────────
+// ─── Organization / ClothingStore Schema ──────────────────────────────────────
 
 export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "ClothingStore",
+    "@type": ["ClothingStore", "OnlineStore"],
+    "@id": `${SITE_URL}/#organization`,
     name: "Rafsan Clothing",
+    alternateName: ["therafsan", "The Rafsan", "রাফসান ক্লোথিং", "Rafsan Store"],
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SITE_URL}/logo.png`,
+      width: 512,
+      height: 512,
+    },
     image: `${SITE_URL}/og-image.png`,
     description:
-      "বাংলাদেশের প্রিমিয়াম ফ্যাশন ব্র্যান্ড Rafsan Clothing — Export Quality পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+, ১০০% অরিজিনাল গ্যারান্টি।",
+      "Rafsan Clothing (therafsan.com) — বাংলাদেশের সেরা BD Brand। Oversized T-Shirt, Drop Shoulder T-Shirt, Polo Shirt, Graphic T-Shirt, Couple T-Shirt, কাস্টমাইজ টি-শার্ট। Export Quality, কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+।",
     telephone: "+8801610735064",
     email: "rafsanclothing@gmail.com",
     priceRange: "৳৳",
     currenciesAccepted: "BDT",
-    paymentAccepted: ["Cash", "Credit Card", "bKash", "Nagad", "Rocket"],
+    paymentAccepted: ["Cash", "bKash", "Nagad", "Rocket", "Credit Card"],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Rafsan Clothing Products",
+      itemListElement: [
+        { "@type": "OfferCatalog", name: "Oversized T-Shirt Bangladesh" },
+        { "@type": "OfferCatalog", name: "Drop Shoulder T-Shirt BD" },
+        { "@type": "OfferCatalog", name: "Polo Shirt BD" },
+        { "@type": "OfferCatalog", name: "Graphic T-Shirt Bangladesh" },
+        { "@type": "OfferCatalog", name: "Couple T-Shirt Bangladesh" },
+        { "@type": "OfferCatalog", name: "Customize T-Shirt BD" },
+        { "@type": "OfferCatalog", name: "Streetwear Bangladesh" },
+        { "@type": "OfferCatalog", name: "Gym Wear Bangladesh" },
+        { "@type": "OfferCatalog", name: "Wholesale T-Shirt Bangladesh" },
+      ],
+    },
     address: {
       "@type": "PostalAddress",
       addressLocality: "Narayanganj",
       addressRegion: "Dhaka Division",
       addressCountry: "BD",
+      postalCode: "1400",
     },
     geo: {
       "@type": "GeoCoordinates",
       latitude: "23.6238",
       longitude: "90.4994",
     },
+    areaServed: {
+      "@type": "Country",
+      name: "Bangladesh",
+    },
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-        ],
+        dayOfWeek: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
         opens: "10:00",
+        closes: "20:00",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Friday"],
+        opens: "14:00",
         closes: "20:00",
       },
     ],
@@ -78,14 +98,15 @@ export function OrganizationSchema() {
         "@type": "ContactPoint",
         telephone: "+8801610735064",
         contactType: "customer service",
-        availableLanguage: ["English", "Bengali"],
+        availableLanguage: ["Bengali", "English"],
         areaServed: "BD",
+        contactOption: "TollFree",
       },
       {
         "@type": "ContactPoint",
         telephone: "+8801610735064",
         contactType: "sales",
-        availableLanguage: ["English", "Bengali"],
+        availableLanguage: ["Bengali", "English"],
         url: "https://wa.me/8801610735064",
       },
     ],
@@ -95,6 +116,14 @@ export function OrganizationSchema() {
       "https://youtube.com/@rafsanclothing",
       "https://tiktok.com/@rafsanclothing",
     ],
+    knowsAbout: [
+      "Oversized T-Shirt Bangladesh",
+      "Drop Shoulder T-Shirt BD",
+      "Export Quality Clothing Bangladesh",
+      "Bangladeshi Fashion Brand",
+      "Streetwear Bangladesh",
+      "Wholesale T-Shirt Bangladesh",
+    ],
   };
 
   return (
@@ -105,14 +134,19 @@ export function OrganizationSchema() {
   );
 }
 
-// ─── WebSite + SearchAction Schema ───────────────────────────────────────────
+// ─── WebSite + SearchAction Schema ────────────────────────────────────────────
 
 export function WebSiteSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
     name: "Rafsan Clothing",
+    alternateName: "therafsan.com",
     url: SITE_URL,
+    description:
+      "বাংলাদেশের সেরা Oversized T-Shirt, Drop Shoulder, Polo Shirt, Graphic T-Shirt Brand — Rafsan Clothing",
+    inLanguage: ["bn-BD", "en-US"],
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -120,6 +154,9 @@ export function WebSiteSchema() {
         urlTemplate: `${SITE_URL}/products?search={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
+    },
+    publisher: {
+      "@id": `${SITE_URL}/#organization`,
     },
   };
 
@@ -131,7 +168,7 @@ export function WebSiteSchema() {
   );
 }
 
-// ─── Product Schema ──────────────────────────────────────────────────────────
+// ─── Product Schema ────────────────────────────────────────────────────────────
 
 export function ProductSchema({ product }: { product: ProductForSchema }) {
   const productUrl = `${SITE_URL}/product/${product.id}`;
@@ -143,13 +180,10 @@ export function ProductSchema({ product }: { product: ProductForSchema }) {
         : [`${SITE_URL}/og-image.png`];
 
   const inStock = product.stock > 0;
-  const priceValidUntil = new Date(
-    Date.now() + 30 * 24 * 60 * 60 * 1000,
-  )
+  const priceValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split("T")[0];
 
-  // Free shipping if price >= 999
   const shippingCost = product.price >= 999 ? "0" : "60";
 
   const schema: Record<string, unknown> = {
@@ -158,12 +192,23 @@ export function ProductSchema({ product }: { product: ProductForSchema }) {
     name: product.name,
     description:
       product.description?.slice(0, 5000) ||
-      `Buy ${product.name} at the best price in Bangladesh. Export quality, fast delivery.`,
+      `Buy ${product.name} at the best price in Bangladesh from Rafsan Clothing (therafsan.com). Export quality, fast delivery across Bangladesh. Cash on Delivery available.`,
     image: images,
     sku: product.sku || product.id,
+    mpn: product.sku || product.id,
     brand: {
       "@type": "Brand",
       name: "Rafsan Clothing",
+      url: SITE_URL,
+    },
+    manufacturer: {
+      "@type": "Organization",
+      name: "Rafsan Clothing",
+      url: SITE_URL,
+    },
+    countryOfOrigin: {
+      "@type": "Country",
+      name: "Bangladesh",
     },
     offers: {
       "@type": "Offer",
@@ -174,9 +219,11 @@ export function ProductSchema({ product }: { product: ProductForSchema }) {
         : "https://schema.org/OutOfStock",
       url: productUrl,
       priceValidUntil,
+      itemCondition: "https://schema.org/NewCondition",
       seller: {
         "@type": "Organization",
         name: "Rafsan Clothing",
+        url: SITE_URL,
       },
       shippingDetails: {
         "@type": "OfferShippingDetails",
@@ -198,16 +245,23 @@ export function ProductSchema({ product }: { product: ProductForSchema }) {
           },
         },
       },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "BD",
+        returnPolicyCategory:
+          "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
     },
   };
 
-  // Add original_price as highPrice if available
   if (product.original_price && product.original_price > product.price) {
     (schema.offers as Record<string, unknown>).highPrice =
       product.original_price.toString();
   }
 
-  // Add category if available
   if (product.category) {
     schema.category = product.category;
   }
@@ -220,7 +274,7 @@ export function ProductSchema({ product }: { product: ProductForSchema }) {
   );
 }
 
-// ─── BreadcrumbList Schema ───────────────────────────────────────────────────
+// ─── BreadcrumbList Schema ─────────────────────────────────────────────────────
 
 export function BreadcrumbSchema({ items }: { items: BreadcrumbItem[] }) {
   const schema = {
@@ -242,7 +296,7 @@ export function BreadcrumbSchema({ items }: { items: BreadcrumbItem[] }) {
   );
 }
 
-// ─── FAQPage Schema ──────────────────────────────────────────────────────────
+// ─── FAQPage Schema ────────────────────────────────────────────────────────────
 
 export function FAQPageSchema({ faqs }: { faqs: FAQItem[] }) {
   const schema = {
@@ -266,7 +320,7 @@ export function FAQPageSchema({ faqs }: { faqs: FAQItem[] }) {
   );
 }
 
-// ─── AggregateOffer Schema (for products listing / category pages) ───────────
+// ─── AggregateOffer / ItemList Schema (category & products pages) ──────────────
 
 export function AggregateOfferSchema({
   products,
@@ -285,8 +339,11 @@ export function AggregateOfferSchema({
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: categoryName
-      ? `${categoryName} — Rafsan Clothing Bangladesh`
-      : "All Products — Rafsan Clothing Bangladesh",
+      ? `${categoryName} — Rafsan Clothing Bangladesh | therafsan.com`
+      : "All T-Shirts & Clothing — Rafsan Clothing Bangladesh",
+    description: categoryName
+      ? `Buy ${categoryName} at Rafsan Clothing Bangladesh. Export quality, কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+।`
+      : "Shop Oversized T-Shirt, Drop Shoulder, Polo Shirt, Graphic T-Shirt, Couple T-Shirt Bangladesh. কম দামে গেঞ্জি, ফ্রি ডেলিভারি।",
     url: categoryName
       ? `${SITE_URL}/category/${encodeURIComponent(categoryName.toLowerCase())}`
       : `${SITE_URL}/products`,
@@ -299,17 +356,59 @@ export function AggregateOfferSchema({
         name: product.name,
         url: `${SITE_URL}/product/${product.id}`,
         image: product.images?.[0] || product.image_url || "",
+        brand: { "@type": "Brand", name: "Rafsan Clothing" },
         offers: {
           "@type": "Offer",
           price: product.price.toString(),
           priceCurrency: "BDT",
+          lowPrice,
+          highPrice,
           availability:
             product.stock > 0
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
+          seller: { "@type": "Organization", name: "Rafsan Clothing" },
         },
       },
     })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+// ─── Local Business Schema (for local SEO) ────────────────────────────────────
+
+export function LocalBusinessSchema() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `${SITE_URL}/#localbusiness`,
+    name: "Rafsan Clothing",
+    image: `${SITE_URL}/og-image.png`,
+    url: SITE_URL,
+    telephone: "+8801610735064",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Narayanganj",
+      addressRegion: "Dhaka Division",
+      postalCode: "1400",
+      addressCountry: "BD",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 23.6238,
+      longitude: 90.4994,
+    },
+    priceRange: "৳৳",
+    servesCuisine: undefined,
+    currenciesAccepted: "BDT",
+    paymentAccepted: "Cash, bKash, Nagad, Rocket",
+    openingHours: ["Su-Th 10:00-20:00", "Fr 14:00-20:00"],
   };
 
   return (

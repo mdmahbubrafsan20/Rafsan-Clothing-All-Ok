@@ -6,8 +6,6 @@ import { ProductSchema, BreadcrumbSchema } from "@/app/schema";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
 
-export const revalidate = 60;
-
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -19,39 +17,80 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) {
     return {
       title: "Product Not Found | Rafsan Clothing",
-      description: "The requested product could not be found.",
+      description: "This product is not available. Browse our full collection of Export Quality T-Shirts at Rafsan Clothing Bangladesh.",
     };
   }
 
-  const shortName =
-    product.name.length > 40
-      ? product.name.split("|")[0].trim()
-      : product.name;
+  const productUrl = `${SITE_URL}/product/${product.id}`;
+  const imageUrl =
+    product.images?.[0] || product.image_url || `${SITE_URL}/og-image.png`;
 
-  const imageUrl = product.images?.[0] || product.image_url || "";
+  const categoryLabel = product.category
+    ? `${product.category} · `
+    : "";
+
+  // Smart title: product name + key buying signals
+  const title = `${product.name} | ${categoryLabel}Export Quality T-Shirt BD | Rafsan Clothing`;
+
+  // Smart description with price + keywords
+  const priceText = product.price
+    ? `মাত্র ৳${product.price}`
+    : "সেরা দামে";
+  const description =
+    product.description?.slice(0, 120) ||
+    `${product.name} কিনুন ${priceText} — Rafsan Clothing Bangladesh (therafsan.com)। Export Quality, কম দামে গেঞ্জি, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery, ৭ দিনের Return গ্যারান্টি।`;
 
   return {
-    title: `${shortName} | Rafsan Clothing`,
-    description:
-      product.description?.slice(0, 160) ||
-      `Buy ${shortName} at the best price in Bangladesh. Fast delivery, quality guaranteed.`,
+    title,
+    description,
+    keywords: [
+      product.name,
+      `${product.name} bangladesh`,
+      `${product.name} bd`,
+      "oversized tshirt bangladesh",
+      "drop shoulder tshirt bd",
+      "buy tshirt online bangladesh",
+      "export quality tshirt bd",
+      "rafsan clothing",
+      "therafsan",
+      "bd brand",
+      "bangladeshi brand",
+      "কম দামে গেঞ্জি",
+      "টি শার্ট দাম বাংলাদেশ",
+      "free delivery clothing bd",
+      "cash on delivery tshirt bd",
+      ...(product.category ? [product.category, `${product.category} bangladesh`] : []),
+    ],
     openGraph: {
-      title: `${shortName} | Rafsan Clothing`,
-      description:
-        product.description?.slice(0, 160) ||
-        `Buy ${shortName} at the best price in Bangladesh.`,
-      images: imageUrl ? [{ url: imageUrl, width: 800, height: 800 }] : [],
+      title: `${product.name} — ${priceText} | Rafsan Clothing Bangladesh`,
+      description,
       type: "website",
+      url: productUrl,
+      siteName: "Rafsan Clothing",
+      locale: "bn_BD",
+      images: [
+        {
+          url: imageUrl,
+          width: 800,
+          height: 800,
+          alt: `${product.name} — Rafsan Clothing Bangladesh | therafsan.com`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${shortName} | Rafsan Clothing`,
-      description:
-        product.description?.slice(0, 160) ||
-        `Buy ${shortName} at the best price in Bangladesh.`,
-      images: imageUrl ? [imageUrl] : [],
+      title: `${product.name} | Rafsan Clothing BD`,
+      description: `${priceText} — Export Quality, ফ্রি ডেলিভারি ৳৯৯৯+।`,
+      images: [imageUrl],
     },
-    alternates: { canonical: `${SITE_URL}/product/${id}` },
+    alternates: { canonical: productUrl },
+    other: {
+      "product:price:amount": product.price?.toString() || "",
+      "product:price:currency": "BDT",
+      "product:availability": product.stock > 0 ? "in stock" : "out of stock",
+      "product:condition": "new",
+      "product:brand": "Rafsan Clothing",
+    },
   };
 }
 
@@ -64,7 +103,7 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  // Fetch related products in parallel
+  // Fetch related products — same as original
   let relatedProducts: Awaited<ReturnType<typeof getProductsByCategory>> = [];
   if (product.category) {
     relatedProducts = await getProductsByCategory(product.category);
@@ -84,7 +123,9 @@ export default async function ProductPage({ params }: Props) {
             ? [
                 {
                   name: product.category,
-                  url: `${SITE_URL}/category/${encodeURIComponent(product.category.toLowerCase())}`,
+                  url: `${SITE_URL}/category/${encodeURIComponent(
+                    product.category.toLowerCase()
+                  )}`,
                 },
               ]
             : []),

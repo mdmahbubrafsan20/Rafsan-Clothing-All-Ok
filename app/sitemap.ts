@@ -4,77 +4,103 @@ import { getAllCategories, fetchActiveProductsForHome } from "@/lib/products";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages
+  const now = new Date();
+
+  // Static pages — ordered by SEO importance
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${SITE_URL}/products`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "daily",
-      priority: 0.8,
+      priority: 0.95,
+    },
+    // Static category shortcuts (fast-loading, high-intent)
+    {
+      url: `${SITE_URL}/category/men`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.9,
     },
     {
-      url: `${SITE_URL}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
+      url: `${SITE_URL}/category/women`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/category/kids`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/category/sports`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     {
       url: `${SITE_URL}/faqs`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "weekly",
+      priority: 0.65,
+    },
+    {
+      url: `${SITE_URL}/about`,
+      lastModified: now,
+      changeFrequency: "monthly",
       priority: 0.6,
     },
     {
-      url: `${SITE_URL}/terms`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${SITE_URL}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
       url: `${SITE_URL}/returns`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
-      url: `${SITE_URL}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.6,
+      url: `${SITE_URL}/privacy`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/terms`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
   ];
 
-  // Dynamic category pages
+  // Dynamic category pages from DB
   let categoryPages: MetadataRoute.Sitemap = [];
   try {
     const categories = await getAllCategories();
-    categoryPages = categories.map((cat) => ({
-      url: `${SITE_URL}/category/${encodeURIComponent(cat.name.toLowerCase())}`,
-      lastModified: new Date(cat.updated_at || Date.now()),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }));
+    // Exclude already-added static categories to avoid duplicates
+    const staticSlugs = ["men", "women", "kids", "sports"];
+    categoryPages = categories
+      .filter(
+        (cat) => !staticSlugs.includes(cat.name.toLowerCase())
+      )
+      .map((cat) => ({
+        url: `${SITE_URL}/category/${encodeURIComponent(cat.name.toLowerCase())}`,
+        lastModified: new Date(cat.updated_at || Date.now()),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }));
   } catch {
-    // Fallback static category slugs if DB fetch fails
-    const fallbackCategories = ["men", "women", "kids", "sports"];
-    categoryPages = fallbackCategories.map((slug) => ({
-      url: `${SITE_URL}/category/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }));
+    // Static category pages already added above as fallback
   }
 
   // Dynamic product pages
@@ -85,10 +111,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/product/${product.id}`,
       lastModified: new Date(product.updated_at || Date.now()),
       changeFrequency: "weekly" as const,
-      priority: 0.7,
+      priority: 0.75,
     }));
   } catch {
-    // If DB fetch fails, product pages will be empty — static pages still served
+    // Product pages empty if DB fails — static pages still served
   }
 
   return [...staticPages, ...categoryPages, ...productPages];

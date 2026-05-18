@@ -7,9 +7,22 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/"],
+        disallow: [
+          "/admin/",
+          "/api/",
+          "/account/",
+          "/checkout/",
+          "/cart/",
+          "/_next/",
+        ],
+      },
+      {
+        // Allow Google Image Bot full access for product images
+        userAgent: "Googlebot-Image",
+        allow: "/",
       },
     ],
     sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

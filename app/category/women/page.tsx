@@ -4,35 +4,62 @@ import BottomNav from "@/components/BottomNav";
 import ProductCard from "@/components/ProductCard";
 import { getProductsByCategory } from "@/lib/products";
 import { STORE_PRODUCT_GRID_CLASS } from "@/lib/product-grid";
-import { BreadcrumbSchema } from "@/app/schema";
+import { BreadcrumbSchema, AggregateOfferSchema } from "@/app/schema";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://therafsan.com";
 
 export const metadata: Metadata = {
-  title: "Women's Collection — Premium Women's Clothing Bangladesh | Rafsan Clothing",
+  title:
+    "মেয়েদের পোশাক অনলাইন | Women's T-Shirt & Clothing Bangladesh | Rafsan Clothing",
   description:
-    "Shop premium women's clothing in Bangladesh. Export quality fashion, trendy styles — free delivery ৳999+, COD available. WhatsApp: 01610-735064",
+    "মেয়েদের পোশাক অনলাইনে কিনুন — মেয়েদের টি শার্ট, Oversized T-Shirt, Couple T-Shirt, Graphic T-Shirt Bangladesh। Export quality, কম দামে পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery। Rafsan Clothing — therafsan.com",
   keywords: [
+    "মেয়েদের পোশাক অনলাইন",
+    "মেয়েদের টি শার্ট",
     "women clothing bangladesh",
-    "womens fashion bd",
-    "buy womens clothes online bd",
-    "premium womens fashion bangladesh",
+    "womens tshirt bangladesh",
+    "oversized tshirt bangladesh",
+    "কাপল টি শার্ট বাংলাদেশ",
+    "couple matching tshirt bd",
+    "graphic tshirt bangladesh",
+    "unisex tshirt bd",
     "ladies clothing bd",
-    "মেয়েদের পোশাক বাংলাদেশ",
+    "buy womens clothes online bangladesh",
+    "export quality tshirt bd",
+    "streetwear bangladesh",
+    "কম দামে পোশাক",
+    "টি শার্ট দাম বাংলাদেশ",
+    "free delivery clothing bd",
+    "cash on delivery tshirt bd",
+    "ফ্রি ডেলিভারি পোশাক",
+    "অনলাইনে কাপড় কেনা",
+    "rafsan clothing",
+    "bd brand",
+    "bangladeshi brand",
   ],
   openGraph: {
     title:
-      "Women's Collection — Premium Women's Clothing Bangladesh | Rafsan Clothing",
+      "মেয়েদের পোশাক অনলাইন | Women's T-Shirt, Couple Tshirt Bangladesh | Rafsan Clothing",
     description:
-      "Shop premium women's clothing in Bangladesh. Export quality, free delivery ৳999+.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+      "মেয়েদের টি শার্ট, Couple T-Shirt, Oversized T-Shirt — কম দামে পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery।",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Women's Clothing Collection — Rafsan Clothing Bangladesh",
+      },
+    ],
     type: "website",
+    url: `${SITE_URL}/category/women`,
+    siteName: "Rafsan Clothing",
+    locale: "bn_BD",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Women's Collection | Rafsan Clothing Bangladesh",
+    title: "মেয়েদের পোশাক | Women's T-Shirt & Clothing Bangladesh",
     description:
-      "Premium women's clothing — export quality, free delivery ৳999+.",
+      "মেয়েদের টি শার্ট, Couple Tshirt — কম দামে পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+।",
     images: ["/og-image.png"],
   },
   alternates: { canonical: `${SITE_URL}/category/women` },
@@ -46,18 +73,20 @@ export default async function WomenCategoryPage() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: SITE_URL },
-          { name: "Women", url: `${SITE_URL}/category/women` },
+          { name: "মেয়েদের কালেকশন", url: `${SITE_URL}/category/women` },
         ]}
       />
-      <div className="min-h-screen bg-white max-md:bg-white pb-20 md:pb-8">
+      <AggregateOfferSchema products={products} categoryName="Women's Clothing" />
+
+      <div className="min-h-screen bg-white pb-20 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Women's Collection
+              মেয়েদের কালেকশন — Women's Clothing BD
             </h1>
             <p className="text-gray-600 mt-2 text-sm md:text-base">
-              Premium women's clothing — export quality, free delivery
-              ৳999+
+              মেয়েদের টি শার্ট · Couple T-Shirt · Oversized T-Shirt · Graphic T-Shirt
+              — কম দামে পোশাক, ফ্রি ডেলিভারি ৳৯৯৯+
             </p>
           </div>
 
@@ -80,6 +109,19 @@ export default async function WomenCategoryPage() {
               ))}
             </div>
           )}
+
+          {/* SEO text block */}
+          <section className="mt-12 pt-8 border-t border-gray-100 max-w-2xl">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+              মেয়েদের পোশাক অনলাইনে সেরা দামে — Rafsan Clothing
+            </h2>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              Rafsan Clothing-এ পাবেন মেয়েদের সেরা পোশাক সংগ্রহ।
+              কাপল টি শার্ট বাংলাদেশ, Oversized T-Shirt, Graphic T-Shirt, Unisex T-Shirt —
+              সব Export Quality। অনলাইনে কাপড় কেনার সবচেয়ে ভরসার জায়গা therafsan.com।
+              ফ্রি ডেলিভারি ৳৯৯৯+, Cash on Delivery, ৭ দিনের Return গ্যারান্টি।
+            </p>
+          </section>
         </div>
       </div>
       <BottomNav />
